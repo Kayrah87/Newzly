@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Laravel Base Documentation
+    url: https://github.com/laravel/laravel
+    about: View the comprehensive Laravel Base documentation and usage guides
+  - name: 💬 Laravel Community Discord
+    url: https://discord.gg/laravel
+    about: Join the Laravel community for general Laravel questions and discussions
+  - name: 📖 Laravel Documentation
+    url: https://laravel.com/docs
+    about: Official Laravel framework documentation for core Laravel features

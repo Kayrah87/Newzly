@@ -1,0 +1,105 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Vite Dev Server",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "dev"
+            ],
+            "console": "integratedTerminal",
+            "serverReadyAction": {
+                "pattern": "➜.*Local:.*?(https?://localhost:\\d+)",
+                "uriFormat": "%s",
+                "action": "openExternally"
+            }
+        },
+        {
+            "name": "Launch Laravel Server (Port 8000)",
+            "type": "php",
+            "request": "launch",
+            "program": "${workspaceFolder}/artisan",
+            "args": [
+                "serve",
+                "--host=0.0.0.0",
+                "--port=8000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "APP_ENV": "local",
+                "APP_DEBUG": "true"
+            },
+            "console": "integratedTerminal",
+            "serverReadyAction": {
+                "pattern": "Server running on \\[(.*)\\]",
+                "uriFormat": "%s",
+                "action": "openExternally"
+            }
+        },
+        {
+            "name": "PHP Xdebug Listen",
+            "type": "php",
+            "request": "launch",
+            "port": 9003,
+            "pathMappings": {
+                "${workspaceFolder}": "${workspaceFolder}"
+            },
+            "ignore": [
+                "**/vendor/**/*.php"
+            ]
+        },
+        {
+            "name": "Laravel with Xdebug (Port 8000)",
+            "type": "php",
+            "request": "launch",
+            "program": "${workspaceFolder}/artisan",
+            "args": [
+                "serve",
+                "--host=0.0.0.0",
+                "--port=8000"
+            ],
+            "cwd": "${workspaceFolder}",
+            "runtimeArgs": [
+                "-dxdebug.mode=debug",
+                "-dxdebug.start_with_request=yes",
+                "-dxdebug.client_port=9003"
+            ],
+            "env": {
+                "APP_ENV": "local",
+                "APP_DEBUG": "true",
+                "XDEBUG_CONFIG": "client_host=127.0.0.1 client_port=9003"
+            },
+            "console": "integratedTerminal",
+            "serverReadyAction": {
+                "pattern": "Server running on \\[(.*)\\]",
+                "uriFormat": "%s",
+                "action": "openExternally"
+            },
+            "pathMappings": {
+                "${workspaceFolder}": "${workspaceFolder}"
+            },
+            "ignore": [
+                "**/vendor/**/*.php"
+            ]
+        }
+    ],
+    "compounds": [
+        {
+            "name": "🚀 Laravel + Vite Dev + Edge Browser",
+            "configurations": [
+                "Launch Laravel Server (Port 8000)"
+            ],
+            "preLaunchTask": "Vite Dev Server"
+        },
+        {
+            "name": "🚀 Laravel Only + Edge Browser",
+            "configurations": [
+                "Launch Laravel Server (Port 8000)"
+            ]
+        }
+    ]
+}
