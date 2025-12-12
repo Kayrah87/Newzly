@@ -44,4 +44,21 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function ownedNewsletters()
+    {
+        return $this->hasMany(Newsletter::class, 'owner_id');
+    }
+
+    public function newsletters()
+    {
+        return $this->belongsToMany(Newsletter::class, 'newsletter_users')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    public function articles()
+    {
+        return $this->hasMany(Article::class, 'author_id');
+    }
 }
