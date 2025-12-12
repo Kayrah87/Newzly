@@ -13,7 +13,7 @@ class NewsletterPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,7 +21,9 @@ class NewsletterPolicy
      */
     public function view(User $user, Newsletter $newsletter): bool
     {
-        return false;
+        // Users can view newsletters they own, edit, or are recipients of
+        return $newsletter->owner_id === $user->id || 
+               $newsletter->users()->where('user_id', $user->id)->exists();
     }
 
     /**
@@ -29,7 +31,7 @@ class NewsletterPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -37,7 +39,13 @@ class NewsletterPolicy
      */
     public function update(User $user, Newsletter $newsletter): bool
     {
-        return false;
+        // Only owners and editors can update newsletters
+        if ($newsletter->owner_id === $user->id) {
+            return true;
+        }
+        
+        $role = $newsletter->users()->where('user_id', $user->id)->first()?->pivot->role;
+        return $role === 'editor';
     }
 
     /**
@@ -45,7 +53,8 @@ class NewsletterPolicy
      */
     public function delete(User $user, Newsletter $newsletter): bool
     {
-        return false;
+        // Only owners can delete newsletters
+        return $newsletter->owner_id === $user->id;
     }
 
     /**
@@ -53,7 +62,7 @@ class NewsletterPolicy
      */
     public function restore(User $user, Newsletter $newsletter): bool
     {
-        return false;
+        return $newsletter->owner_id === $user->id;
     }
 
     /**
@@ -61,6 +70,28 @@ class NewsletterPolicy
      */
     public function forceDelete(User $user, Newsletter $newsletter): bool
     {
-        return false;
+        return $newsletter->owner_id === $user->id;
+    }
+
+    /**
+     * Determine whether the user can manage editors
+     */
+    public function manageEditors(User $user, Newsletter $newsletter): bool
+    {
+        return $newsletter->owner_id === $user->id;
+    }
+
+    /**
+     * Determine whether the user can manage recipients
+     */
+    public function manageRecipients(User $user, Newsletter $newsletter): bool
+    {
+        // Both owners and editors can manage recipients
+        if ($newsletter->owner_id === $user->id) {
+            return true;
+        }
+        
+        $role = $newsletter->users()->where('user_id', $user->id)->first()?->pivot->role;
+        return $role === 'editor';
     }
 }
