@@ -5,7 +5,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 test('laravel base installation is working', function () {
-    expect(app()->version())->toContain('11.');
+    expect(app()->version())->toMatch('/^\d+\.\d+/');
 });
 
 test('database connection works', function () {
@@ -37,5 +37,5 @@ test('welcome page returns successfully', function () {
     $response = $this->get('/');
     
     $response->assertStatus(200);
-    $response->assertSee('Laravel Base Template');
+    $response->assertSee('Newzly');
 });

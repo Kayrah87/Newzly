@@ -31,3 +31,7 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
+
+# Storage framework files
+/storage/framework/views/*.php
+/storage/logs/*.log
