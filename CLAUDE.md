@@ -98,6 +98,15 @@ component (branded, no app nav), not `<x-app-layout>`:
   phase).
 - `confirm/{token}` — completes double opt-in (`Subscriber::confirm()`).
 - `unsubscribe/{token}` (GET landing + POST perform) — token is the `unsubscribe_token`.
+- `submit` (GET/POST) — public story/photo submission (`PublicSubmissionController`),
+  honeypot + throttle + required consent. Creates a `Story` with `source=public`,
+  `status=pending`, `issue_id=null` (+ `submitter_name`/`submitter_email` + images).
+
+Editors moderate submissions at `publications.submissions.*` (`SubmissionController`,
+`update` ability): the queue lists pending public stories; **approve** assigns the story to
+one of the publication's issues and sets it `approved` (then it sends like any story);
+**reject** sets `rejected`. Story `issue_id` is nullable precisely so submissions can sit
+unassigned until approved.
 
 ### Sending issues
 Each Publication can carry its own SMTP credentials (`smtp_*` columns; `smtp_username`/

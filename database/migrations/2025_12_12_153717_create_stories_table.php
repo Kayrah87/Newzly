@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('stories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('publication_id')->constrained()->onDelete('cascade');
-            $table->foreignId('issue_id')->constrained()->onDelete('cascade');
+            // Nullable: public submissions start unassigned until an editor
+            // approves them into an issue.
+            $table->foreignId('issue_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('title');
             $table->longText('content');
             $table->foreignId('author_id')->nullable()->constrained('users')->onDelete('set null');

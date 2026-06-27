@@ -33,6 +33,8 @@ class Story extends Model
         'source',
         'status',
         'author_id',
+        'submitter_name',
+        'submitter_email',
         'order',
     ];
 

@@ -133,6 +133,24 @@
                         </div>
                     @endcan
 
+                    @can('update', $publication)
+                        @php
+                            $pendingSubmissions = $publication->stories()
+                                ->where('source', 'public')->where('status', 'pending')->count();
+                        @endphp
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                            <div class="p-6">
+                                <h3 class="text-lg font-semibold mb-4">Submissions</h3>
+                                <a href="{{ route('publications.submissions.index', $publication) }}" class="flex items-center justify-between text-indigo-600 hover:text-indigo-800">
+                                    <span>Review submissions</span>
+                                    @if($pendingSubmissions > 0)
+                                        <span class="bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded-full">{{ $pendingSubmissions }} pending</span>
+                                    @endif
+                                </a>
+                            </div>
+                        </div>
+                    @endcan
+
                     @can('manageEditors', $publication)
                         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                             <div class="p-6">

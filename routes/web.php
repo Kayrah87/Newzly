@@ -3,8 +3,10 @@
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicationController;
+use App\Http\Controllers\PublicSubmissionController;
 use App\Http\Controllers\PublicSubscriptionController;
 use App\Http\Controllers\StoryController;
+use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\SubscriberController;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +39,13 @@ Route::middleware('auth')->group(function () {
     // Story routes (scoped to publication + issue)
     Route::resource('publications.issues.stories', StoryController::class)->scoped()->except(['index', 'show']);
 
+    // Public submission moderation queue (scoped to publication)
+    Route::get('publications/{publication}/submissions', [SubmissionController::class, 'index'])->name('publications.submissions.index');
+    Route::patch('publications/{publication}/submissions/{story}/approve', [SubmissionController::class, 'approve'])
+        ->scopeBindings()->name('publications.submissions.approve');
+    Route::patch('publications/{publication}/submissions/{story}/reject', [SubmissionController::class, 'reject'])
+        ->scopeBindings()->name('publications.submissions.reject');
+
     // Subscriber / mailing-list routes (scoped to publication)
     Route::resource('publications.subscribers', SubscriberController::class)->scoped()->only(['index', 'store', 'destroy']);
     Route::patch('publications/{publication}/subscribers/{subscriber}/unsubscribe', [SubscriberController::class, 'unsubscribe'])
@@ -55,6 +64,12 @@ Route::prefix('p/{publication:slug}')->name('public.')->group(function () {
     Route::post('unsubscribe/{token}', [PublicSubscriptionController::class, 'unsubscribe'])
         ->middleware('throttle:10,1')
         ->name('unsubscribe.perform');
+
+    // Public story/photo submission.
+    Route::get('submit', [PublicSubmissionController::class, 'create'])->name('submit');
+    Route::post('submit', [PublicSubmissionController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('submit.store');
 });
 
 require __DIR__.'/auth.php';
