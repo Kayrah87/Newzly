@@ -92,6 +92,48 @@
                             <x-input-error :messages="$errors->get('reply_to_email')" class="mt-2" />
                         </div>
 
+                        {{-- SMTP delivery --}}
+                        <hr class="my-6">
+                        <h3 class="text-lg font-semibold mb-1">{{ __('Email delivery (SMTP)') }}</h3>
+                        <p class="text-sm text-gray-500 mb-4">
+                            {{ __('Optional. When set, issues are sent through your own SMTP server. Leave blank to use the platform default.') }}
+                            @if($publication->hasSmtpConfigured())
+                                <span class="text-green-600 font-medium">SMTP is configured.</span>
+                            @endif
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <x-input-label for="smtp_host" :value="__('Host')" />
+                                <x-text-input id="smtp_host" class="block mt-1 w-full" type="text" name="smtp_host" :value="old('smtp_host', $publication->smtp_host)" placeholder="smtp.example.com" />
+                                <x-input-error :messages="$errors->get('smtp_host')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="smtp_port" :value="__('Port')" />
+                                <x-text-input id="smtp_port" class="block mt-1 w-full" type="number" name="smtp_port" :value="old('smtp_port', $publication->smtp_port)" placeholder="587" />
+                                <x-input-error :messages="$errors->get('smtp_port')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="smtp_username" :value="__('Username')" />
+                                <x-text-input id="smtp_username" class="block mt-1 w-full" type="text" name="smtp_username" :value="old('smtp_username', $publication->smtp_username)" autocomplete="off" />
+                                <x-input-error :messages="$errors->get('smtp_username')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="smtp_password" :value="__('Password')" />
+                                <x-text-input id="smtp_password" class="block mt-1 w-full" type="password" name="smtp_password" autocomplete="new-password" placeholder="{{ $publication->smtp_password ? '•••••••• (unchanged)' : '' }}" />
+                                <x-input-error :messages="$errors->get('smtp_password')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="smtp_encryption" :value="__('Encryption')" />
+                                <select id="smtp_encryption" name="smtp_encryption" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="">None</option>
+                                    <option value="tls" @selected(old('smtp_encryption', $publication->smtp_encryption) === 'tls')>TLS</option>
+                                    <option value="ssl" @selected(old('smtp_encryption', $publication->smtp_encryption) === 'ssl')>SSL</option>
+                                </select>
+                                <x-input-error :messages="$errors->get('smtp_encryption')" class="mt-2" />
+                            </div>
+                        </div>
+
                         <div class="flex items-center justify-end mt-6">
                             <a href="{{ route('publications.show', $publication) }}" class="text-gray-600 hover:text-gray-900 mr-4">Cancel</a>
                             <x-primary-button>

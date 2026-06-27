@@ -36,6 +36,11 @@ class Publication extends Model
         'from_name',
         'from_email',
         'reply_to_email',
+        'smtp_host',
+        'smtp_port',
+        'smtp_username',
+        'smtp_password',
+        'smtp_encryption',
         'owner_id',
         'settings',
     ];
@@ -43,7 +48,45 @@ class Publication extends Model
     protected $casts = [
         'settings' => 'array',
         'social_links' => 'array',
+        'smtp_username' => 'encrypted',
+        'smtp_password' => 'encrypted',
     ];
+
+    /**
+     * Whether this publication has its own SMTP credentials configured.
+     */
+    public function hasSmtpConfigured(): bool
+    {
+        return filled($this->smtp_host)
+            && filled($this->smtp_port)
+            && filled($this->smtp_username)
+            && filled($this->smtp_password);
+    }
+
+    /**
+     * Register (if needed) and return the mailer name to send this
+     * publication's email through — its own SMTP, or the app default.
+     */
+    public function configuredMailerName(): string
+    {
+        if (! $this->hasSmtpConfigured()) {
+            return config('mail.default');
+        }
+
+        $name = 'publication_'.$this->id;
+
+        config(['mail.mailers.'.$name => [
+            'transport' => 'smtp',
+            'host' => $this->smtp_host,
+            'port' => (int) $this->smtp_port,
+            'username' => $this->smtp_username,
+            'password' => $this->smtp_password,
+            'encryption' => $this->smtp_encryption,
+            'timeout' => null,
+        ]]);
+
+        return $name;
+    }
 
     /**
      * Disk used for this publication's public media (logo, photos).

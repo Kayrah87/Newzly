@@ -22,6 +22,11 @@
                     {{ session('success') }}
                 </div>
             @endif
+            @if(session('error'))
+                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {{ session('error') }}
+                </div>
+            @endif
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Main Content -->
@@ -108,6 +113,32 @@
                             </div>
                         </div>
                     </div>
+
+                    @can('update', $publication)
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                            <div class="p-6">
+                                <h3 class="text-lg font-semibold mb-4">Send</h3>
+                                @if($issue->isSent())
+                                    <p class="text-sm text-gray-600 mb-1">
+                                        Sent {{ $issue->published_at?->format('M d, Y H:i') }}
+                                    </p>
+                                    <p class="text-sm text-gray-600">
+                                        {{ $issue->deliveries()->where('status', 'sent')->count() }} delivered
+                                        @php $failed = $issue->deliveries()->where('status', 'failed')->count(); @endphp
+                                        @if($failed > 0)<span class="text-red-600">, {{ $failed }} failed</span>@endif
+                                    </p>
+                                @else
+                                    <p class="text-sm text-gray-600 mb-3">
+                                        {{ $publication->subscribers()->where('status', 'confirmed')->count() }} confirmed subscriber(s) will receive this issue.
+                                    </p>
+                                    <form method="POST" action="{{ route('publications.issues.send', [$publication, $issue]) }}" onsubmit="return confirm('Send this issue to all confirmed subscribers?');">
+                                        @csrf
+                                        <x-primary-button>Send to subscribers</x-primary-button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                    @endcan
 
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                         <div class="p-6">

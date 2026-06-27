@@ -29,6 +29,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('publications.issues', IssueController::class)->scoped()->except(['index']);
     Route::get('publications/{publication}/issues', [IssueController::class, 'index'])->name('publications.issues.index');
 
+    // Send an issue to confirmed subscribers
+    Route::post('publications/{publication}/issues/{issue}/send', [IssueController::class, 'send'])
+        ->scopeBindings()
+        ->name('publications.issues.send');
+
     // Story routes (scoped to publication + issue)
     Route::resource('publications.issues.stories', StoryController::class)->scoped()->except(['index', 'show']);
 

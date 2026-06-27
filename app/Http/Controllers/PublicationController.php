@@ -102,6 +102,11 @@ class PublicationController extends Controller
             'social_links.*' => 'nullable|url|max:255',
             'logo' => 'nullable|image|max:2048',
             'remove_logo' => 'nullable|boolean',
+            'smtp_host' => 'nullable|string|max:255',
+            'smtp_port' => 'nullable|integer|min:1|max:65535',
+            'smtp_username' => 'nullable|string|max:255',
+            'smtp_password' => 'nullable|string|max:255',
+            'smtp_encryption' => 'nullable|in:tls,ssl',
         ]);
 
         // Keep only known platforms with a non-empty URL.
@@ -118,7 +123,16 @@ class PublicationController extends Controller
             'from_email' => $validated['from_email'] ?? null,
             'reply_to_email' => $validated['reply_to_email'] ?? null,
             'social_links' => $social ?: null,
+            'smtp_host' => $validated['smtp_host'] ?? null,
+            'smtp_port' => $validated['smtp_port'] ?? null,
+            'smtp_username' => $validated['smtp_username'] ?? null,
+            'smtp_encryption' => $validated['smtp_encryption'] ?? null,
         ]);
+
+        // Only overwrite the stored SMTP password when a new one is entered.
+        if (filled($validated['smtp_password'] ?? null)) {
+            $publication->smtp_password = $validated['smtp_password'];
+        }
 
         $disk = Publication::mediaDisk();
 

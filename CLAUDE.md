@@ -94,6 +94,21 @@ component (branded, no app nav), not `<x-app-layout>`:
 - `confirm/{token}` — completes double opt-in (`Subscriber::confirm()`).
 - `unsubscribe/{token}` (GET landing + POST perform) — token is the `unsubscribe_token`.
 
+### Sending issues
+Each Publication can carry its own SMTP credentials (`smtp_*` columns; `smtp_username`/
+`smtp_password` use the `encrypted` cast). `Publication::configuredMailerName()` registers
+a runtime mailer from those creds and returns its name, or falls back to `config('mail.default')`
+when none are set — always send through `Mail::mailer($publication->configuredMailerName())`.
+
+Sending an issue (`IssueController@send`, owner/editor) dispatches the queued `SendIssue`
+job, which mails `App\Mail\IssueNewsletter` to **confirmed** subscribers only, records one
+`IssueDelivery` row per recipient (unique per issue+subscriber, so re-runs never
+double-send), and calls `Issue::markSent()`. The email template (`emails/issue.blade.php`)
+renders stories via per-layout partials `emails/stories/{layout}.blade.php` (only
+`standard` exists now — Phase 5 adds more) and **always** includes the subscriber's
+unsubscribe link (GDPR). Scheduled issues are dispatched by the `issues:send-scheduled`
+command (registered every-minute in `routes/console.php`).
+
 ### Routing
 Routes are nested resource routes in `routes/web.php`, all behind `auth`:
 - `publications` (full resource) + custom `publications.editors`

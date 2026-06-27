@@ -32,4 +32,22 @@ class Issue extends Model
     {
         return $this->hasMany(Story::class, 'issue_id')->orderBy('order');
     }
+
+    public function deliveries(): HasMany
+    {
+        return $this->hasMany(IssueDelivery::class);
+    }
+
+    public function isSent(): bool
+    {
+        return $this->status === 'sent';
+    }
+
+    public function markSent(): void
+    {
+        $this->forceFill([
+            'status' => 'sent',
+            'published_at' => $this->published_at ?? now(),
+        ])->save();
+    }
 }

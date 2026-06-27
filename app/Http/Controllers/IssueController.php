@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendIssue;
 use App\Models\Issue;
 use App\Models\Publication;
 use Illuminate\Http\Request;
@@ -105,5 +106,23 @@ class IssueController extends Controller
 
         return redirect()->route('publications.issues.index', $publication)
             ->with('success', 'Issue deleted successfully!');
+    }
+
+    /**
+     * Send this issue to the publication's confirmed subscribers.
+     */
+    public function send(Publication $publication, Issue $issue)
+    {
+        $this->authorize('update', $publication);
+
+        if ($issue->isSent()) {
+            return redirect()->route('publications.issues.show', [$publication, $issue])
+                ->with('error', 'This issue has already been sent.');
+        }
+
+        SendIssue::dispatch($issue);
+
+        return redirect()->route('publications.issues.show', [$publication, $issue])
+            ->with('success', 'Issue queued for sending to confirmed subscribers.');
     }
 }
