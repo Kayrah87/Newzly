@@ -39,7 +39,8 @@ php artisan test --filter=PublicationTest       # single file/test by name
 ./vendor/bin/pint                     # fix
 ./vendor/bin/pint --test              # check only
 
-# Seed development data (users + roles)
+# Seed the platform super admin (admin@newzly.test / password by default;
+# override with ADMIN_EMAIL / ADMIN_PASSWORD env)
 php artisan db:seed                   # or: php artisan migrate --seed
 ```
 
