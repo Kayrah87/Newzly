@@ -80,6 +80,20 @@ Mailing-list management is gated by the `manageSubscribers` policy ability (owne
 and lives under scoped `publications.subscribers.*` routes (`SubscriberController`).
 Manual adds require an explicit consent attestation checkbox, recorded in the audit log.
 
+### Public (unauthenticated) pages
+Per-publication public pages live under `/p/{publication:slug}/…` (route name prefix
+`public.`, `PublicSubscriptionController`) — note these bind the publication by **slug**
+while all admin routes bind by **id**. They render with the `<x-public-layout>` anonymous
+component (branded, no app nav), not `<x-app-layout>`:
+- `subscribe` (GET/POST) — double opt-in signup. Bot protection is **honeypot field +
+  `throttle` middleware only** (no third-party captcha, by product decision). The POST
+  always returns the same "check your email" page regardless of branch, to prevent email
+  enumeration. Sends `App\Mail\SubscriptionConfirmation` (uses the publication's
+  from/reply-to identity; via the default mailer for now — per-publication SMTP is a later
+  phase).
+- `confirm/{token}` — completes double opt-in (`Subscriber::confirm()`).
+- `unsubscribe/{token}` (GET landing + POST perform) — token is the `unsubscribe_token`.
+
 ### Routing
 Routes are nested resource routes in `routes/web.php`, all behind `auth`:
 - `publications` (full resource) + custom `publications.editors`

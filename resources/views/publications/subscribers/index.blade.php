@@ -36,6 +36,17 @@
                 </div>
             </div>
 
+            {{-- Shareable public subscribe link --}}
+            <div class="bg-white shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold mb-2">Public subscribe link</h3>
+                    <p class="text-sm text-gray-500 mb-2">Share this link so people can opt in (double opt-in confirmation is sent automatically).</p>
+                    <input type="text" readonly value="{{ route('public.subscribe', ['publication' => $publication->slug]) }}"
+                        onclick="this.select()"
+                        class="block w-full bg-gray-50 border-gray-300 rounded-md text-sm">
+                </div>
+            </div>
+
             {{-- Manual add --}}
             <div class="bg-white shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">

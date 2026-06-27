@@ -3,6 +3,7 @@
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicationController;
+use App\Http\Controllers\PublicSubscriptionController;
 use App\Http\Controllers\StoryController;
 use App\Http\Controllers\SubscriberController;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,19 @@ Route::middleware('auth')->group(function () {
     Route::patch('publications/{publication}/subscribers/{subscriber}/unsubscribe', [SubscriberController::class, 'unsubscribe'])
         ->scopeBindings()
         ->name('publications.subscribers.unsubscribe');
+});
+
+// Public, unauthenticated subscription pages (per publication, by slug).
+Route::prefix('p/{publication:slug}')->name('public.')->group(function () {
+    Route::get('subscribe', [PublicSubscriptionController::class, 'create'])->name('subscribe');
+    Route::post('subscribe', [PublicSubscriptionController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('subscribe.store');
+    Route::get('confirm/{token}', [PublicSubscriptionController::class, 'confirm'])->name('confirm');
+    Route::get('unsubscribe/{token}', [PublicSubscriptionController::class, 'unsubscribeForm'])->name('unsubscribe');
+    Route::post('unsubscribe/{token}', [PublicSubscriptionController::class, 'unsubscribe'])
+        ->middleware('throttle:10,1')
+        ->name('unsubscribe.perform');
 });
 
 require __DIR__.'/auth.php';
