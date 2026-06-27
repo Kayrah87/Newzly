@@ -28,7 +28,12 @@
                 <div class="md:col-span-2">
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                         <div class="p-6">
-                            <h3 class="text-lg font-semibold mb-4">Publication Information</h3>
+                            <div class="flex items-start gap-4 mb-4">
+                                @if($publication->logoUrl())
+                                    <img src="{{ $publication->logoUrl() }}" alt="{{ $publication->name }} logo" class="h-16 w-16 object-contain rounded border">
+                                @endif
+                                <h3 class="text-lg font-semibold pt-1">Publication Information</h3>
+                            </div>
                             <div class="space-y-3">
                                 <div>
                                     <span class="text-gray-600 font-medium">Description:</span>
@@ -38,6 +43,28 @@
                                     <span class="text-gray-600 font-medium">Owner:</span>
                                     <p class="text-gray-800">{{ $publication->owner->name }}</p>
                                 </div>
+                                @if($publication->website_url)
+                                    <div>
+                                        <span class="text-gray-600 font-medium">Website:</span>
+                                        <a href="{{ $publication->website_url }}" target="_blank" rel="noopener" class="text-indigo-600 hover:text-indigo-800 break-all">{{ $publication->website_url }}</a>
+                                    </div>
+                                @endif
+                                @if(!empty($publication->social_links))
+                                    <div>
+                                        <span class="text-gray-600 font-medium">Social:</span>
+                                        <span class="space-x-3">
+                                            @foreach($publication->social_links as $platform => $url)
+                                                <a href="{{ $url }}" target="_blank" rel="noopener" class="text-indigo-600 hover:text-indigo-800">{{ \App\Models\Publication::SOCIAL_PLATFORMS[$platform] ?? ucfirst($platform) }}</a>
+                                            @endforeach
+                                        </span>
+                                    </div>
+                                @endif
+                                @if($publication->from_email)
+                                    <div>
+                                        <span class="text-gray-600 font-medium">Sends as:</span>
+                                        <p class="text-gray-800">{{ $publication->from_name ?: $publication->name }} &lt;{{ $publication->from_email }}&gt;</p>
+                                    </div>
+                                @endif
                                 <div>
                                     <span class="text-gray-600 font-medium">Created:</span>
                                     <p class="text-gray-800">{{ $publication->created_at->format('M d, Y') }}</p>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Publication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PublicationController extends Controller
 {
@@ -88,12 +89,55 @@ class PublicationController extends Controller
     {
         $this->authorize('update', $publication);
 
+        $allowedPlatforms = array_keys(Publication::SOCIAL_PLATFORMS);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'website_url' => 'nullable|url|max:255',
+            'from_name' => 'nullable|string|max:255',
+            'from_email' => 'nullable|email|max:255',
+            'reply_to_email' => 'nullable|email|max:255',
+            'social_links' => 'nullable|array',
+            'social_links.*' => 'nullable|url|max:255',
+            'logo' => 'nullable|image|max:2048',
+            'remove_logo' => 'nullable|boolean',
         ]);
 
-        $publication->update($validated);
+        // Keep only known platforms with a non-empty URL.
+        $social = collect($validated['social_links'] ?? [])
+            ->only($allowedPlatforms)
+            ->filter()
+            ->all();
+
+        $publication->fill([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'website_url' => $validated['website_url'] ?? null,
+            'from_name' => $validated['from_name'] ?? null,
+            'from_email' => $validated['from_email'] ?? null,
+            'reply_to_email' => $validated['reply_to_email'] ?? null,
+            'social_links' => $social ?: null,
+        ]);
+
+        $disk = Publication::mediaDisk();
+
+        if ($request->boolean('remove_logo') && $publication->logo_path) {
+            Storage::disk($disk)->delete($publication->logo_path);
+            $publication->logo_path = null;
+        }
+
+        if ($request->hasFile('logo')) {
+            if ($publication->logo_path) {
+                Storage::disk($disk)->delete($publication->logo_path);
+            }
+            $publication->logo_path = $request->file('logo')->store(
+                "publications/{$publication->id}/logo",
+                $disk
+            );
+        }
+
+        $publication->save();
 
         return redirect()->route('publications.show', $publication)
             ->with('success', 'Publication updated successfully!');

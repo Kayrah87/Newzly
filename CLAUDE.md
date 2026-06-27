@@ -100,8 +100,15 @@ relevant installer. Check `composer.json` before assuming a package is available
   drivers all default to `database` (`.env.example`).
 - Issue/article content is stored as HTML (WYSIWYG editor); `content` columns are
   `longText`/nullable.
-- Foreign keys cascade on delete (deleting a newsletter removes its issues, articles via
+- Foreign keys cascade on delete (deleting a publication removes its issues, stories via
   the chain, and pivot rows).
+- **Public uploads** (publication logos; later story photos) go on the disk named by
+  `config('filesystems.media_disk')` (`MEDIA_DISK` env — `public` locally, `s3` in prod).
+  Use `Publication::mediaDisk()` / `Publication::logoUrl()`; local dev needs
+  `php artisan storage:link`. Tests fake it with `Storage::fake(Publication::mediaDisk())`.
+- A Publication carries its branding (`logo_path`, `website_url`, `social_links` JSON keyed
+  by `Publication::SOCIAL_PLATFORMS`) and email identity (`from_name`, `from_email`,
+  `reply_to_email`). These are edited on the publication edit form, not at creation.
 
 ===
 
