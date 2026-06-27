@@ -167,8 +167,11 @@ relevant installer. Check `composer.json` before assuming a package is available
 
 - Default DB is **SQLite** (`database/database.sqlite`); session, cache, and queue
   drivers all default to `database` (`.env.example`).
-- Issue/article content is stored as HTML (WYSIWYG editor); `content` columns are
-  `longText`/nullable.
+- Issue/story content is stored as HTML (WYSIWYG editor); `content` columns are
+  `longText`/nullable. The editor is currently **TinyMCE via the no-api-key CDN**
+  (`@push('scripts')` blocks in the issue/story create/edit forms, bound to `#content`).
+  **TODO / planned:** swap TinyMCE for the **free, open-source Tiptap** editor (self-hosted
+  via Vite, no CDN/API key) across those four forms.
 - Foreign keys cascade on delete (deleting a publication removes its issues, stories via
   the chain, and pivot rows).
 - **Public uploads** (publication logos; later story photos) go on the disk named by
