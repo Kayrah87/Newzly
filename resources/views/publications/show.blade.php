@@ -133,7 +133,7 @@
                         </div>
                     @endcan
 
-                    @can('update', $publication)
+                    @can('moderateSubmissions', $publication)
                         @php
                             $pendingSubmissions = $publication->stories()
                                 ->where('source', 'public')->where('status', 'pending')->count();

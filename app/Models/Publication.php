@@ -157,6 +157,11 @@ class Publication extends Model
         return $this->hasMany(Subscriber::class);
     }
 
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(Invitation::class);
+    }
+
     /**
      * Team members (app users) with a role on this publication.
      */

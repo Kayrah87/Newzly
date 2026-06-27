@@ -138,8 +138,21 @@ Controllers receive parent models via route-model binding (e.g. `StoryController
 ### Authorization
 Access control goes through **`PublicationPolicy`** (`app/Policies/`, auto-discovered by
 naming convention). Controllers call `$this->authorize(...)` — do not scatter ad-hoc role
-checks in controllers; extend the policy instead. `update` allows `owner`+`editor`;
-destructive abilities are owner-only.
+checks in controllers; extend the policy instead. Role abilities (`hasRole` helper):
+- `update` (publication settings, issues, send) — `owner`, `editor`
+- `manageStories` (create/edit stories) — `owner`, `editor`, `contributor`
+- `moderateSubmissions` (submission queue) — `owner`, `editor`, `fact_checker`
+- `manageSubscribers` (mailing list) — `owner`, `editor`
+- `manageEditors` (team invites + membership) and `delete`/destructive — `owner` only
+
+### Team & invitations
+Owners invite people by email + role (`Invitation` model: `editor|contributor|
+fact_checker`, tokened, 7-day expiry) via `publications.invitations.*`; a `TeamInvitation`
+email links to the public `invitations.show` landing. The recipient accepts at
+`invitations.accept` (auth required, **email must match** the invite) which attaches them
+to `publication_users` with the role. Owners revoke invites and remove members
+(`publications.members.destroy`, owner can't be removed) from the team page
+(`PublicationController@editors`).
 
 ### Template tooling (inherited from Laravel Base)
 `app/Console/Commands/` contains interactive installer commands (`laravel-base:install`,

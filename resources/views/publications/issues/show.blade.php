@@ -7,6 +7,8 @@
             <div class="space-x-2">
                 @can('update', $publication)
                     <a href="{{ route('publications.issues.edit', [$publication, $issue]) }}" class="text-gray-600 hover:text-gray-900">Edit</a>
+                @endcan
+                @can('manageStories', $publication)
                     <a href="{{ route('publications.issues.stories.create', [$publication, $issue]) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">
                         Add Story
                     </a>
@@ -55,7 +57,7 @@
                                         <div class="border-l-4 border-indigo-500 pl-4">
                                             <div class="flex justify-between items-start mb-2">
                                                 <h4 class="font-semibold text-lg">{{ $story->title }}</h4>
-                                                @can('update', $publication)
+                                                @can('manageStories', $publication)
                                                     <div class="flex space-x-2">
                                                         <a href="{{ route('publications.issues.stories.edit', [$publication, $issue, $story]) }}" class="text-gray-600 hover:text-gray-800 text-sm">Edit</a>
                                                         <form method="POST" action="{{ route('publications.issues.stories.destroy', [$publication, $issue, $story]) }}" class="inline" onsubmit="return confirm('Are you sure?');">

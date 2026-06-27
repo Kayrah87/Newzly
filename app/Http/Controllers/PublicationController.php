@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Publication;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -171,14 +172,32 @@ class PublicationController extends Controller
     }
 
     /**
-     * Show the form for managing team editors.
+     * Manage the publication's team (members + pending invitations).
      */
     public function editors(Publication $publication)
     {
         $this->authorize('manageEditors', $publication);
 
-        $editors = $publication->editors()->get();
+        $members = $publication->members()->orderBy('name')->get();
+        $invitations = $publication->invitations()->pending()->latest()->get();
 
-        return view('publications.editors', compact('publication', 'editors'));
+        return view('publications.editors', compact('publication', 'members', 'invitations'));
+    }
+
+    /**
+     * Remove a member from the publication's team.
+     */
+    public function removeMember(Publication $publication, User $user)
+    {
+        $this->authorize('manageEditors', $publication);
+
+        if ($publication->owner_id === $user->id) {
+            return back()->withErrors(['member' => 'You cannot remove the owner.']);
+        }
+
+        $publication->members()->detach($user->id);
+
+        return redirect()->route('publications.editors', $publication)
+            ->with('success', 'Team member removed.');
     }
 }

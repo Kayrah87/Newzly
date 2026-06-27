@@ -13,7 +13,7 @@ class SubmissionController extends Controller
      */
     public function index(Publication $publication)
     {
-        $this->authorize('update', $publication);
+        $this->authorize('moderateSubmissions', $publication);
 
         $submissions = $publication->stories()
             ->where('source', Story::SOURCE_PUBLIC)
@@ -32,7 +32,7 @@ class SubmissionController extends Controller
      */
     public function approve(Request $request, Publication $publication, Story $story)
     {
-        $this->authorize('update', $publication);
+        $this->authorize('moderateSubmissions', $publication);
 
         $validated = $request->validate([
             'issue_id' => 'required|integer|exists:issues,id',
@@ -55,7 +55,7 @@ class SubmissionController extends Controller
      */
     public function reject(Publication $publication, Story $story)
     {
-        $this->authorize('update', $publication);
+        $this->authorize('moderateSubmissions', $publication);
 
         $story->update(['status' => Story::STATUS_REJECTED]);
 

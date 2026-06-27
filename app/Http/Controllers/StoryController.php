@@ -16,7 +16,7 @@ class StoryController extends Controller
      */
     public function create(Publication $publication, Issue $issue)
     {
-        $this->authorize('update', $publication);
+        $this->authorize('manageStories', $publication);
 
         return view('publications.issues.stories.create', compact('publication', 'issue'));
     }
@@ -26,7 +26,7 @@ class StoryController extends Controller
      */
     public function store(Request $request, Publication $publication, Issue $issue)
     {
-        $this->authorize('update', $publication);
+        $this->authorize('manageStories', $publication);
 
         $validated = $this->validateStory($request);
 
@@ -52,7 +52,7 @@ class StoryController extends Controller
      */
     public function edit(Publication $publication, Issue $issue, Story $story)
     {
-        $this->authorize('update', $publication);
+        $this->authorize('manageStories', $publication);
 
         $story->load('images');
 
@@ -64,7 +64,7 @@ class StoryController extends Controller
      */
     public function update(Request $request, Publication $publication, Issue $issue, Story $story)
     {
-        $this->authorize('update', $publication);
+        $this->authorize('manageStories', $publication);
 
         $validated = $this->validateStory($request, withStatus: true);
 
@@ -96,7 +96,7 @@ class StoryController extends Controller
      */
     public function destroy(Publication $publication, Issue $issue, Story $story)
     {
-        $this->authorize('update', $publication);
+        $this->authorize('manageStories', $publication);
 
         foreach ($story->images as $image) {
             Storage::disk(Publication::mediaDisk())->delete($image->path);

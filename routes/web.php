@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicationController;
@@ -27,6 +28,15 @@ Route::middleware('auth')->group(function () {
     Route::resource('publications', PublicationController::class);
     Route::get('publications/{publication}/editors', [PublicationController::class, 'editors'])->name('publications.editors');
 
+    // Team invitations + membership
+    Route::post('publications/{publication}/invitations', [InvitationController::class, 'store'])->name('publications.invitations.store');
+    Route::delete('publications/{publication}/invitations/{invitation}', [InvitationController::class, 'destroy'])
+        ->scopeBindings()->name('publications.invitations.destroy');
+    Route::delete('publications/{publication}/members/{user}', [PublicationController::class, 'removeMember'])->name('publications.members.destroy');
+
+    // Accept an invitation (must be signed in as the invited email)
+    Route::post('invitations/{token}/accept', [InvitationController::class, 'accept'])->name('invitations.accept');
+
     // Issue routes (scoped so an issue must belong to its publication)
     Route::resource('publications.issues', IssueController::class)->scoped()->except(['index']);
     Route::get('publications/{publication}/issues', [IssueController::class, 'index'])->name('publications.issues.index');
@@ -52,6 +62,9 @@ Route::middleware('auth')->group(function () {
         ->scopeBindings()
         ->name('publications.subscribers.unsubscribe');
 });
+
+// Invitation landing page (viewable by guests so they can sign in / register).
+Route::get('invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
 
 // Public, unauthenticated subscription pages (per publication, by slug).
 Route::prefix('p/{publication:slug}')->name('public.')->group(function () {

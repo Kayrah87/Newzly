@@ -83,6 +83,22 @@ class PublicationPolicy
     }
 
     /**
+     * Determine whether the user can create/edit stories.
+     */
+    public function manageStories(User $user, Publication $publication): bool
+    {
+        return $this->hasRole($user, $publication, ['owner', 'editor', 'contributor']);
+    }
+
+    /**
+     * Determine whether the user can moderate public submissions.
+     */
+    public function moderateSubmissions(User $user, Publication $publication): bool
+    {
+        return $this->hasRole($user, $publication, ['owner', 'editor', 'fact_checker']);
+    }
+
+    /**
      * Determine whether the user holds one of the given roles on the publication.
      */
     protected function hasRole(User $user, Publication $publication, array $roles): bool
