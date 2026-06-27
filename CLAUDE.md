@@ -54,9 +54,14 @@ carries `publication_id` for **tenant isolation**:
   Has many `Issue`s and `Story`s.
 - **Issue** — belongs to a Publication. `status` enum: `draft | scheduled | sent`.
   Has many `Story`s **ordered by the `order` column**.
-- **Story** — belongs to a Publication (`publication_id`) and an Issue (FK is `issue_id`,
-  not the conventional `issue_id`-vs-`newsletter_issue_id` — it's plain `issue_id`), plus
-  a nullable `User` author (`author_id`).
+- **Story** — belongs to a Publication (`publication_id`) and an Issue (FK is plain
+  `issue_id`), plus a nullable `User` author (`author_id`). Has a `layout`
+  (`standard|picture|title_only`, see `Story::LAYOUTS`), a `source` (`admin|public`), a
+  `status` (`pending|approved|rejected` — only `approved` stories are emailed, via
+  `scopeApproved`), and many `StoryImage`s (`heroImage()` = first). Images live on the
+  media disk; `StoryImage::url()` returns an absolute URL (emails need it).
+- **Issue** also carries editorial metadata: `issue_number`, `coverage_label` (e.g.
+  "May–June", "Q2"), `release_date`.
 - **PublicationUser** — pivot joining app users to publications with a `role` enum
   (`owner | editor | contributor | fact_checker`), unique per (publication, user).
 

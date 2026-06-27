@@ -18,6 +18,24 @@
                             <x-input-error :messages="$errors->get('title')" class="mt-2" />
                         </div>
 
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <x-input-label for="issue_number" :value="__('Issue number')" />
+                                <x-text-input id="issue_number" class="block mt-1 w-full" type="number" name="issue_number" :value="old('issue_number')" placeholder="e.g. 42" />
+                                <x-input-error :messages="$errors->get('issue_number')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="coverage_label" :value="__('Coverage')" />
+                                <x-text-input id="coverage_label" class="block mt-1 w-full" type="text" name="coverage_label" :value="old('coverage_label')" placeholder="e.g. May–June, Q2, Spring" />
+                                <x-input-error :messages="$errors->get('coverage_label')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="release_date" :value="__('Release date')" />
+                                <x-text-input id="release_date" class="block mt-1 w-full" type="date" name="release_date" :value="old('release_date')" />
+                                <x-input-error :messages="$errors->get('release_date')" class="mt-2" />
+                            </div>
+                        </div>
+
                         <div class="mb-4">
                             <x-input-label for="content" :value="__('Content')" />
                             <textarea id="content" name="content" rows="15" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('content') }}</textarea>

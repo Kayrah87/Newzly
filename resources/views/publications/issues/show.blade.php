@@ -66,7 +66,21 @@
                                                     </div>
                                                 @endcan
                                             </div>
-                                            <p class="text-sm text-gray-600 mb-2">By {{ $story->author->name ?? 'Unknown' }} • Order: {{ $story->order }}</p>
+                                            <p class="text-sm text-gray-600 mb-2">
+                                                By {{ $story->author->name ?? 'Unknown' }} • Order: {{ $story->order }}
+                                                • Layout: {{ str_replace('_', ' ', $story->layout) }}
+                                                @php
+                                                    $statusBadge = match($story->status) {
+                                                        'approved' => 'bg-green-100 text-green-800',
+                                                        'pending' => 'bg-yellow-100 text-yellow-800',
+                                                        default => 'bg-red-100 text-red-800',
+                                                    };
+                                                @endphp
+                                                <span class="px-2 py-0.5 text-xs rounded-full {{ $statusBadge }}">{{ ucfirst($story->status) }}</span>
+                                                @if($story->images->isNotEmpty())
+                                                    • {{ $story->images->count() }} image(s)
+                                                @endif
+                                            </p>
                                             <div class="prose max-w-none">
                                                 {!! Str::limit($story->content, 300) !!}
                                             </div>
@@ -96,6 +110,24 @@
                                         {{ $issue->status }}
                                     </p>
                                 </div>
+                                @if($issue->issue_number)
+                                    <div>
+                                        <span class="text-gray-600 font-medium">Issue number:</span>
+                                        <p class="text-gray-800">#{{ $issue->issue_number }}</p>
+                                    </div>
+                                @endif
+                                @if($issue->coverage_label)
+                                    <div>
+                                        <span class="text-gray-600 font-medium">Coverage:</span>
+                                        <p class="text-gray-800">{{ $issue->coverage_label }}</p>
+                                    </div>
+                                @endif
+                                @if($issue->release_date)
+                                    <div>
+                                        <span class="text-gray-600 font-medium">Release date:</span>
+                                        <p class="text-gray-800">{{ $issue->release_date->format('M d, Y') }}</p>
+                                    </div>
+                                @endif
                                 <div>
                                     <span class="text-gray-600 font-medium">Created:</span>
                                     <p class="text-gray-800">{{ $issue->created_at->format('M d, Y') }}</p>

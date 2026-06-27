@@ -23,6 +23,9 @@ class StoryFactory extends Factory
             'issue_id' => $issue->id,
             'title' => fake()->sentence(5),
             'content' => fake()->paragraphs(2, true),
+            'layout' => 'standard',
+            'source' => Story::SOURCE_ADMIN,
+            'status' => Story::STATUS_APPROVED,
             'author_id' => User::factory(),
             'order' => 0,
         ];

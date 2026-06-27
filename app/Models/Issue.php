@@ -14,6 +14,9 @@ class Issue extends Model
     protected $fillable = [
         'publication_id',
         'title',
+        'issue_number',
+        'coverage_label',
+        'release_date',
         'content',
         'status',
         'published_at',
@@ -21,6 +24,7 @@ class Issue extends Model
 
     protected $casts = [
         'published_at' => 'datetime',
+        'release_date' => 'date',
     ];
 
     public function publication(): BelongsTo

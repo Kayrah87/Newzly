@@ -40,6 +40,9 @@ class IssueController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'issue_number' => 'nullable|integer|min:0',
+            'coverage_label' => 'nullable|string|max:255',
+            'release_date' => 'nullable|date',
             'content' => 'nullable|string',
             'status' => 'required|in:draft,scheduled,sent',
             'published_at' => 'nullable|date',
@@ -58,7 +61,7 @@ class IssueController extends Controller
     {
         $this->authorize('view', $publication);
 
-        $issue->load('stories.author');
+        $issue->load('stories.author', 'stories.images');
 
         return view('publications.issues.show', compact('publication', 'issue'));
     }
@@ -84,6 +87,9 @@ class IssueController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'issue_number' => 'nullable|integer|min:0',
+            'coverage_label' => 'nullable|string|max:255',
+            'release_date' => 'nullable|date',
             'content' => 'nullable|string',
             'status' => 'required|in:draft,scheduled,sent',
             'published_at' => 'nullable|date',

@@ -44,7 +44,7 @@ class IssueNewsletter extends Mailable
             with: [
                 'issue' => $this->issue,
                 'publication' => $publication,
-                'stories' => $this->issue->stories,
+                'stories' => $this->issue->stories()->approved()->with('images')->get(),
                 'unsubscribeUrl' => route('public.unsubscribe', [
                     'publication' => $publication->slug,
                     'token' => $this->subscriber->unsubscribe_token,
