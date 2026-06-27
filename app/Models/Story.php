@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Article extends Model
+class Story extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
+        'publication_id',
         'issue_id',
         'title',
         'content',
@@ -15,9 +19,14 @@ class Article extends Model
         'order',
     ];
 
+    public function publication(): BelongsTo
+    {
+        return $this->belongsTo(Publication::class);
+    }
+
     public function issue(): BelongsTo
     {
-        return $this->belongsTo(NewsletterIssue::class, 'issue_id');
+        return $this->belongsTo(Issue::class, 'issue_id');
     }
 
     public function author(): BelongsTo

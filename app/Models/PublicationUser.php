@@ -5,17 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class NewsletterUser extends Model
+class PublicationUser extends Model
 {
     protected $fillable = [
-        'newsletter_id',
+        'publication_id',
         'user_id',
         'role',
     ];
 
-    public function newsletter(): BelongsTo
+    public function publication(): BelongsTo
     {
-        return $this->belongsTo(Newsletter::class);
+        return $this->belongsTo(Publication::class);
     }
 
     public function user(): BelongsTo

@@ -4,10 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-A newsletter management application built on **Laravel 12** (PHP 8.2+), bootstrapped from
-the "Laravel Base Template". Auth scaffolding is Laravel Breeze (Blade + Alpine.js);
-frontend assets are built with Vite + Tailwind CSS 4. API auth uses Laravel Sanctum.
-Testing is **Pest** (not PHPUnit-style classes by default).
+Newzly is a **multi-tenant SaaS for newsletter publications**, built on **Laravel 13**
+(PHP 8.3+), bootstrapped from the "Laravel Base Template". Auth scaffolding is Laravel
+Breeze (Blade + Alpine.js); frontend assets are built with Vite + Tailwind CSS 4. API
+auth uses Laravel Sanctum. Testing is **Pest** (not PHPUnit-style classes by default).
+The product domain term is **Publication** (a newsletter title, e.g. "Farming Monthly");
+the code models a Publication → Issue → Story hierarchy. The broader product vision and
+phased build roadmap live in Claude's project memory, not in the repo.
 
 ## Commands
 
@@ -29,7 +32,7 @@ npm run build                         # production assets
 
 # Tests (Pest)
 php artisan test                      # full suite
-php artisan test --filter=NewsletterTest        # single file/test by name
+php artisan test --filter=PublicationTest       # single file/test by name
 ./vendor/bin/pest tests/Feature/ProfileTest.php # run one file directly
 
 # Lint / format (Laravel Pint)
@@ -43,37 +46,45 @@ php artisan db:seed                   # or: php artisan migrate --seed
 ## Architecture
 
 ### Domain model (the core of this app)
-The data model is a three-level hierarchy plus a role pivot:
+The data model is a three-level hierarchy plus a team-role pivot. Every child table
+carries `publication_id` for **tenant isolation**:
 
-- **Newsletter** — owned by a `User` (`owner_id`). Has many `NewsletterIssue`s.
-  `settings` is a JSON column cast to array.
-- **NewsletterIssue** — belongs to a Newsletter. `status` enum: `draft | scheduled | sent`.
-  Has many `Article`s **ordered by the `order` column**.
-- **Article** — belongs to an issue (FK is `issue_id`, not the conventional
-  `newsletter_issue_id`) and to a `User` author (`author_id`).
-- **NewsletterUser** — pivot joining users to newsletters with a `role` enum
-  (`owner | editor | recipient`), unique per (newsletter, user).
+- **Publication** — owned by a `User` (`owner_id`); has a unique `slug` (auto-generated
+  from the name in `Publication::booted()`). `settings` is a JSON column cast to array.
+  Has many `Issue`s and `Story`s.
+- **Issue** — belongs to a Publication. `status` enum: `draft | scheduled | sent`.
+  Has many `Story`s **ordered by the `order` column**.
+- **Story** — belongs to a Publication (`publication_id`) and an Issue (FK is `issue_id`,
+  not the conventional `issue_id`-vs-`newsletter_issue_id` — it's plain `issue_id`), plus
+  a nullable `User` author (`author_id`).
+- **PublicationUser** — pivot joining app users to publications with a `role` enum
+  (`owner | editor | contributor | fact_checker`), unique per (publication, user).
 
-Role helpers live on the models: `Newsletter::editors()` / `recipients()` filter the
-pivot via `wherePivot('role', ...)`. When a newsletter is created, the owner is both set
-as `owner_id` **and** attached to the pivot with role `owner` (see
-`NewsletterController::store`). Keep both in sync when changing ownership logic.
+Team helpers live on the models: `Publication::members()` is the pivot relation,
+`editors()` filters it via `wherePivot('role', ...)`. When a publication is created, the
+owner is both set as `owner_id` **and** attached to the pivot with role `owner` (see
+`PublicationController::store`). Keep both in sync when changing ownership logic.
+
+**Subscribers are NOT app users** — the mailing list / GDPR consent model is a separate
+concern (planned, not yet built). Do not reintroduce a `recipient` role on the pivot.
 
 ### Routing
 Routes are nested resource routes in `routes/web.php`, all behind `auth`:
-- `newsletters` (full resource) + custom `newsletters.editors` / `newsletters.recipients`
-- `newsletters.issues` (resource, no `index` — custom index route instead)
-- `newsletters.issues.articles` (resource, no `index`/`show`)
+- `publications` (full resource) + custom `publications.editors`
+- `publications.issues` (`->scoped()`, no `index` — custom index route instead)
+- `publications.issues.stories` (`->scoped()`, no `index`/`show`)
 
-This nesting means controllers receive parent models via route-model binding (e.g.
-`ArticleController` gets `$newsletter`, `$issue`, `$article`). `routes/auth.php` holds
-Breeze auth routes; `routes/api.php` exposes a Sanctum-guarded `/api/user`.
+The `->scoped()` bindings enforce tenant isolation: a child must belong to its parent in
+the URL or the binding 404s (see the test in `tests/Feature/PublicationTest.php`).
+Controllers receive parent models via route-model binding (e.g. `StoryController` gets
+`$publication`, `$issue`, `$story`). `routes/auth.php` holds Breeze auth routes;
+`routes/api.php` exposes a Sanctum-guarded `/api/user`.
 
 ### Authorization
-Access control goes through **`NewsletterPolicy`** (`app/Policies/`). Controllers call
-`$this->authorize(...)` — do not scatter ad-hoc role checks in controllers; extend the
-policy instead. The newsletter/issue/article ownership chain is the basis for who can
-edit what.
+Access control goes through **`PublicationPolicy`** (`app/Policies/`, auto-discovered by
+naming convention). Controllers call `$this->authorize(...)` — do not scatter ad-hoc role
+checks in controllers; extend the policy instead. `update` allows `owner`+`editor`;
+destructive abilities are owner-only.
 
 ### Template tooling (inherited from Laravel Base)
 `app/Console/Commands/` contains interactive installer commands (`laravel-base:install`,

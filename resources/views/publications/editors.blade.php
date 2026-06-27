@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Manage Editors - {{ $newsletter->name }}
+            Manage Editors - {{ $publication->name }}
         </h2>
     </x-slot>
 
@@ -36,15 +36,15 @@
                         <div class="bg-blue-50 border border-blue-200 rounded p-4">
                             <p class="text-sm text-blue-800">
                                 <strong>Note:</strong> Editor management functionality is coming soon. 
-                                Editors will be able to create and edit issues and articles, 
-                                but won't be able to delete the newsletter or manage other editors.
+                                Editors will be able to create and edit issues and stories, 
+                                but won't be able to delete the publication or manage other editors.
                             </p>
                         </div>
                     </div>
 
                     <div class="mt-6">
-                        <a href="{{ route('newsletters.show', $newsletter) }}" class="text-indigo-600 hover:text-indigo-800">
-                            ← Back to Newsletter
+                        <a href="{{ route('publications.show', $publication) }}" class="text-indigo-600 hover:text-indigo-800">
+                            ← Back to Publication
                         </a>
                     </div>
                 </div>

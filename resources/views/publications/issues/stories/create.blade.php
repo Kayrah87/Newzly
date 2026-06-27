@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Add Article') }} - {{ $issue->title }}
+            {{ __('Add Story') }} - {{ $issue->title }}
         </h2>
     </x-slot>
 
@@ -9,11 +9,11 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <form method="POST" action="{{ route('newsletters.issues.articles.store', [$newsletter, $issue]) }}">
+                    <form method="POST" action="{{ route('publications.issues.stories.store', [$publication, $issue]) }}">
                         @csrf
 
                         <div class="mb-4">
-                            <x-input-label for="title" :value="__('Article Title')" />
+                            <x-input-label for="title" :value="__('Story Title')" />
                             <x-text-input id="title" class="block mt-1 w-full" type="text" name="title" :value="old('title')" required autofocus />
                             <x-input-error :messages="$errors->get('title')" class="mt-2" />
                         </div>
@@ -32,9 +32,9 @@
                         </div>
 
                         <div class="flex items-center justify-end mt-6">
-                            <a href="{{ route('newsletters.issues.show', [$newsletter, $issue]) }}" class="text-gray-600 hover:text-gray-900 mr-4">Cancel</a>
+                            <a href="{{ route('publications.issues.show', [$publication, $issue]) }}" class="text-gray-600 hover:text-gray-900 mr-4">Cancel</a>
                             <x-primary-button>
-                                {{ __('Add Article') }}
+                                {{ __('Add Story') }}
                             </x-primary-button>
                         </div>
                     </form>

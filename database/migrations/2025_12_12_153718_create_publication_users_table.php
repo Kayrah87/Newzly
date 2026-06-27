@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('newsletter_users', function (Blueprint $table) {
+        Schema::create('publication_users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('newsletter_id')->constrained()->onDelete('cascade');
+            $table->foreignId('publication_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('role', ['owner', 'editor', 'recipient'])->default('recipient');
+            $table->enum('role', ['owner', 'editor', 'contributor', 'fact_checker'])->default('contributor');
             $table->timestamps();
-            
-            $table->unique(['newsletter_id', 'user_id']);
+
+            $table->unique(['publication_id', 'user_id']);
         });
     }
 
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('newsletter_users');
+        Schema::dropIfExists('publication_users');
     }
 };

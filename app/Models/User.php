@@ -45,20 +45,20 @@ class User extends Authenticatable
         ];
     }
 
-    public function ownedNewsletters()
+    public function ownedPublications()
     {
-        return $this->hasMany(Newsletter::class, 'owner_id');
+        return $this->hasMany(Publication::class, 'owner_id');
     }
 
-    public function newsletters()
+    public function publications()
     {
-        return $this->belongsToMany(Newsletter::class, 'newsletter_users')
+        return $this->belongsToMany(Publication::class, 'publication_users')
             ->withPivot('role')
             ->withTimestamps();
     }
 
-    public function articles()
+    public function stories()
     {
-        return $this->hasMany(Article::class, 'author_id');
+        return $this->hasMany(Story::class, 'author_id');
     }
 }

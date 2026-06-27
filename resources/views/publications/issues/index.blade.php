@@ -2,10 +2,10 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ $newsletter->name }} - Issues
+                {{ $publication->name }} - Issues
             </h2>
-            @can('update', $newsletter)
-                <a href="{{ route('newsletters.issues.create', $newsletter) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">
+            @can('update', $publication)
+                <a href="{{ route('publications.issues.create', $publication) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">
                     Create Issue
                 </a>
             @endcan
@@ -44,9 +44,9 @@
                                             </div>
                                         </div>
                                         <div class="flex space-x-2">
-                                            <a href="{{ route('newsletters.issues.show', [$newsletter, $issue]) }}" class="text-indigo-600 hover:text-indigo-800">View</a>
-                                            @can('update', $newsletter)
-                                                <a href="{{ route('newsletters.issues.edit', [$newsletter, $issue]) }}" class="text-gray-600 hover:text-gray-800">Edit</a>
+                                            <a href="{{ route('publications.issues.show', [$publication, $issue]) }}" class="text-indigo-600 hover:text-indigo-800">View</a>
+                                            @can('update', $publication)
+                                                <a href="{{ route('publications.issues.edit', [$publication, $issue]) }}" class="text-gray-600 hover:text-gray-800">Edit</a>
                                             @endcan
                                         </div>
                                     </div>

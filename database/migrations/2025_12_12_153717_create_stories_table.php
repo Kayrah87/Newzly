@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('newsletter_issues', function (Blueprint $table) {
+        Schema::create('stories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('newsletter_id')->constrained()->onDelete('cascade');
+            $table->foreignId('publication_id')->constrained()->onDelete('cascade');
+            $table->foreignId('issue_id')->constrained()->onDelete('cascade');
             $table->string('title');
-            $table->longText('content')->nullable();
-            $table->enum('status', ['draft', 'scheduled', 'sent'])->default('draft');
-            $table->timestamp('published_at')->nullable();
+            $table->longText('content');
+            $table->foreignId('author_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->integer('order')->default(0);
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('newsletter_issues');
+        Schema::dropIfExists('stories');
     }
 };

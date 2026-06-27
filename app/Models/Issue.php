@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class NewsletterIssue extends Model
+class Issue extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'newsletter_id',
+        'publication_id',
         'title',
         'content',
         'status',
@@ -20,13 +23,13 @@ class NewsletterIssue extends Model
         'published_at' => 'datetime',
     ];
 
-    public function newsletter(): BelongsTo
+    public function publication(): BelongsTo
     {
-        return $this->belongsTo(Newsletter::class);
+        return $this->belongsTo(Publication::class);
     }
 
-    public function articles(): HasMany
+    public function stories(): HasMany
     {
-        return $this->hasMany(Article::class, 'issue_id')->orderBy('order');
+        return $this->hasMany(Story::class, 'issue_id')->orderBy('order');
     }
 }

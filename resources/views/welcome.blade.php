@@ -39,7 +39,7 @@
                             <a href="{{ route('register') }}" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 inline-block">Start Free Trial</a>
                             <a href="#features" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-indigo-600 inline-block">Learn More</a>
                         @else
-                            <a href="{{ route('newsletters.index') }}" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 inline-block">Go to Newsletters</a>
+                            <a href="{{ route('publications.index') }}" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 inline-block">Go to Publications</a>
                         @endguest
                     </div>
                 </div>
@@ -145,7 +145,7 @@
                     @guest
                         <a href="{{ route('register') }}" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 inline-block">Sign Up Now - It's Free</a>
                     @else
-                        <a href="{{ route('newsletters.create') }}" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 inline-block">Create Your First Newsletter</a>
+                        <a href="{{ route('publications.create') }}" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 inline-block">Create Your First Publication</a>
                     @endguest
                 </div>
             </div>
