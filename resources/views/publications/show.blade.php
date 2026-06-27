@@ -114,9 +114,24 @@
                                     <span class="text-gray-600">Editors:</span>
                                     <span class="font-semibold">{{ $publication->editors()->count() }}</span>
                                 </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Subscribers:</span>
+                                    <span class="font-semibold">{{ $publication->subscribers()->where('status', 'confirmed')->count() }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    @can('manageSubscribers', $publication)
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                            <div class="p-6">
+                                <h3 class="text-lg font-semibold mb-4">Mailing List</h3>
+                                <a href="{{ route('publications.subscribers.index', $publication) }}" class="block text-indigo-600 hover:text-indigo-800">
+                                    Manage Subscribers
+                                </a>
+                            </div>
+                        </div>
+                    @endcan
 
                     @can('manageEditors', $publication)
                         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">

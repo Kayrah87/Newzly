@@ -109,6 +109,11 @@ class Publication extends Model
         return $this->hasMany(Story::class);
     }
 
+    public function subscribers(): HasMany
+    {
+        return $this->hasMany(Subscriber::class);
+    }
+
     /**
      * Team members (app users) with a role on this publication.
      */

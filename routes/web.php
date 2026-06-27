@@ -4,6 +4,7 @@ use App\Http\Controllers\IssueController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\StoryController;
+use App\Http\Controllers\SubscriberController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -29,6 +30,12 @@ Route::middleware('auth')->group(function () {
 
     // Story routes (scoped to publication + issue)
     Route::resource('publications.issues.stories', StoryController::class)->scoped()->except(['index', 'show']);
+
+    // Subscriber / mailing-list routes (scoped to publication)
+    Route::resource('publications.subscribers', SubscriberController::class)->scoped()->only(['index', 'store', 'destroy']);
+    Route::patch('publications/{publication}/subscribers/{subscriber}/unsubscribe', [SubscriberController::class, 'unsubscribe'])
+        ->scopeBindings()
+        ->name('publications.subscribers.unsubscribe');
 });
 
 require __DIR__.'/auth.php';

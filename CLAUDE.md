@@ -65,8 +65,20 @@ Team helpers live on the models: `Publication::members()` is the pivot relation,
 owner is both set as `owner_id` **and** attached to the pivot with role `owner` (see
 `PublicationController::store`). Keep both in sync when changing ownership logic.
 
-**Subscribers are NOT app users** — the mailing list / GDPR consent model is a separate
-concern (planned, not yet built). Do not reintroduce a `recipient` role on the pivot.
+**Subscribers are NOT app users.** The mailing list is its own model:
+
+- **Subscriber** — belongs to a Publication; `status` enum `pending | confirmed |
+  unsubscribed`; carries the GDPR consent record (`consent_at/ip/source`), a
+  `confirmation_token` (double opt-in, Phase 3), and a unique `unsubscribe_token`. Tokens
+  auto-generate in `booted()`. Helpers: `confirm()`, `unsubscribe()`, `recordEvent()`,
+  scope `mailable()` (= confirmed). Do not reintroduce a `recipient` role on the pivot.
+- **ConsentEvent** — append-only audit log (`UPDATED_AT = null`) of consent actions
+  (subscribed/confirmed/unsubscribed…) with ip/user_agent/meta. Write only via
+  `Subscriber::recordEvent()`.
+
+Mailing-list management is gated by the `manageSubscribers` policy ability (owner+editor)
+and lives under scoped `publications.subscribers.*` routes (`SubscriberController`).
+Manual adds require an explicit consent attestation checkbox, recorded in the audit log.
 
 ### Routing
 Routes are nested resource routes in `routes/web.php`, all behind `auth`:

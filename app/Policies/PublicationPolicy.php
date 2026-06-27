@@ -75,6 +75,14 @@ class PublicationPolicy
     }
 
     /**
+     * Determine whether the user can manage the mailing list.
+     */
+    public function manageSubscribers(User $user, Publication $publication): bool
+    {
+        return $this->hasRole($user, $publication, ['owner', 'editor']);
+    }
+
+    /**
      * Determine whether the user holds one of the given roles on the publication.
      */
     protected function hasRole(User $user, Publication $publication, array $roles): bool
