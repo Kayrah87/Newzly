@@ -130,9 +130,21 @@ test('the email markup follows cross-client (email-safe) conventions', function 
         // Outlook-specific hardening.
         ->toContain('<!--[if mso]>')
         ->toContain('mso-line-height-rule:exactly')
+        // Outlook (Word engine) hardening that can't be checked by rendering on
+        // Linux: DPI fix, width attribute Outlook honours, bgcolor fallback.
+        ->toContain('PixelsPerInch')
+        ->toContain('width="600"')
+        ->toContain('bgcolor=')
+        // Web-safe font fallback (no reliance on a single web font).
+        ->toContain('Arial')
         // Mobile responsiveness + WYSIWYG content normalisation.
         ->toContain('@media only screen and (max-width:600px)')
         ->toContain('.story-content')
+        // No client-stripped / spam-flagging constructs.
+        ->not->toContain('<script')
+        ->not->toContain('stylesheet')
+        ->not->toContain('position:absolute')
+        ->not->toContain('float:')
         // GDPR unsubscribe link is always present.
         ->toContain('Unsubscribe');
 });
