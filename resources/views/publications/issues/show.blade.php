@@ -225,26 +225,71 @@
                     </div>
 
                     @can('update', $publication)
-                        <div class="np-card mb-6">
+                        @php $confirmedCount = $publication->subscribers()->where('status', 'confirmed')->count(); @endphp
+                        <div class="np-card mb-6" x-data="{ scheduling: {{ $errors->has('published_at') ? 'true' : 'false' }} }">
                             <div class="p-6">
-                                <h3 class="font-display text-lg font-bold mb-4">Send</h3>
+                                <h3 class="font-display text-lg font-bold mb-4">Publish &amp; Send</h3>
+
                                 @if($issue->isSent())
+                                    <p class="np-badge-press mb-3">Sent</p>
                                     <p class="text-sm text-ink-soft mb-1">
-                                        Sent {{ $issue->published_at?->format('M d, Y H:i') }}
+                                        Sent {{ $issue->published_at?->format('M j, Y g:i A') }}
                                     </p>
                                     <p class="text-sm text-ink-soft">
                                         {{ $issue->deliveries()->where('status', 'sent')->count() }} delivered
                                         @php $failed = $issue->deliveries()->where('status', 'failed')->count(); @endphp
                                         @if($failed > 0)<span class="text-press-600 font-semibold">, {{ $failed }} failed</span>@endif
                                     </p>
+                                @elseif($issue->status === 'scheduled' && $issue->published_at)
+                                    <p class="np-badge-ink mb-3">Scheduled</p>
+                                    <p class="text-sm text-ink-soft mb-3">
+                                        Sends automatically on
+                                        <span class="text-ink font-semibold">{{ $issue->published_at->format('M j, Y g:i A') }}</span>
+                                        to {{ $confirmedCount }} confirmed subscriber(s).
+                                    </p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <form method="POST" action="{{ route('publications.issues.send', [$publication, $issue]) }}" onsubmit="return confirm('Send this issue now to all confirmed subscribers?');">
+                                            @csrf
+                                            <x-primary-button>Send now</x-primary-button>
+                                        </form>
+                                        <form method="POST" action="{{ route('publications.issues.unschedule', [$publication, $issue]) }}">
+                                            @csrf
+                                            <x-secondary-button type="submit">Cancel schedule</x-secondary-button>
+                                        </form>
+                                    </div>
                                 @else
                                     <p class="text-sm text-ink-soft mb-3">
-                                        {{ $publication->subscribers()->where('status', 'confirmed')->count() }} confirmed subscriber(s) will receive this issue.
+                                        {{ $confirmedCount }} confirmed subscriber(s) will receive this issue.
                                     </p>
-                                    <form method="POST" action="{{ route('publications.issues.send', [$publication, $issue]) }}" onsubmit="return confirm('Send this issue to all confirmed subscribers?');">
-                                        @csrf
-                                        <x-primary-button>Send to subscribers</x-primary-button>
-                                    </form>
+                                    @if($confirmedCount === 0)
+                                        <p class="mb-3 border-l-4 border-ink bg-ink/5 text-ink px-3 py-2 text-sm">
+                                            No confirmed subscribers yet — you can still schedule ahead.
+                                        </p>
+                                    @endif
+
+                                    <div class="flex flex-wrap gap-2">
+                                        <form method="POST" action="{{ route('publications.issues.send', [$publication, $issue]) }}" onsubmit="return confirm('Send this issue now to all confirmed subscribers?');">
+                                            @csrf
+                                            <x-primary-button>Send now</x-primary-button>
+                                        </form>
+                                        <x-secondary-button type="button" @click="scheduling = ! scheduling">Schedule…</x-secondary-button>
+                                    </div>
+
+                                    <div x-show="scheduling" x-cloak class="mt-4 border-t border-ink/10 pt-4">
+                                        <form method="POST" action="{{ route('publications.issues.schedule', [$publication, $issue]) }}">
+                                            @csrf
+                                            <label for="published_at" class="np-label mb-1">Send at</label>
+                                            <input type="datetime-local" id="published_at" name="published_at"
+                                                   min="{{ now()->format('Y-m-d\TH:i') }}"
+                                                   value="{{ old('published_at') }}"
+                                                   class="np-input" required>
+                                            <x-input-error :messages="$errors->get('published_at')" class="mt-2" />
+                                            <div class="mt-3">
+                                                <x-primary-button>Schedule send</x-primary-button>
+                                            </div>
+                                            <p class="mt-2 text-xs text-ink-soft">Sends automatically at this time (checked every minute).</p>
+                                        </form>
+                                    </div>
                                 @endif
                             </div>
                         </div>
