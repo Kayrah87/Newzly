@@ -190,6 +190,31 @@ test('the events block renders in the email with the reference layout', function
         ->toContain('border-left:4px solid #6aa84f');
 });
 
+test('the event calendar colour falls back to the accent but can be customised', function () {
+    // Unset → follows the main accent.
+    $fallback = Publication::factory()->create(['palette' => ['accent' => '#123456']]);
+    expect($fallback->paletteColors()['event_accent'])->toBe('#123456');
+
+    // Set → used independently of the accent for the event card + date.
+    $publication = Publication::factory()->create([
+        'palette' => ['accent' => '#000000', 'event_accent' => '#6aa84f'],
+    ]);
+    $issue = Issue::factory()->create(['publication_id' => $publication->id]);
+    $subscriber = Subscriber::factory()->confirmed()->create(['publication_id' => $publication->id]);
+    $block = Block::factory()->create([
+        'publication_id' => $publication->id,
+        'issue_id' => $issue->id,
+        'title_style' => 'none',
+        'order' => 1,
+    ]);
+    $block->events()->create(['name' => 'Ride-out', 'date' => '2026-05-17', 'order' => 1]);
+
+    $html = (new IssueNewsletter($issue, $subscriber))->render();
+
+    expect($publication->paletteColors()['event_accent'])->toBe('#6aa84f')
+        ->and($html)->toContain('border-left:4px solid #6aa84f');
+});
+
 test('the plain title style renders the title in the accent colour without a banner', function () {
     $publication = Publication::factory()->create([
         'palette' => ['accent' => '#6aa84f'],
