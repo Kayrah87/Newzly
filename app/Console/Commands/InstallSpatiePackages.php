@@ -34,13 +34,13 @@ class InstallSpatiePackages extends Command
         $this->info('🚀 Installing Spatie Packages...');
 
         $packages = [];
-        
+
         if ($this->option('all')) {
             $packages = [
                 'spatie/laravel-settings' => 'Settings',
                 'spatie/laravel-permission' => 'Permissions',
                 'spatie/laravel-medialibrary' => 'Media Library',
-                'spatie/laravel-activitylog' => 'Activity Log'
+                'spatie/laravel-activitylog' => 'Activity Log',
             ];
         } else {
             if ($this->option('settings')) {
@@ -57,7 +57,7 @@ class InstallSpatiePackages extends Command
             }
         }
 
-        if (empty($packages) && !$this->option('all')) {
+        if (empty($packages) && ! $this->option('all')) {
             $packages = $this->askForPackages();
         }
 
@@ -79,11 +79,11 @@ class InstallSpatiePackages extends Command
             'spatie/laravel-settings' => 'Settings - Store application settings in the database',
             'spatie/laravel-permission' => 'Permissions - Associate users and roles with permissions',
             'spatie/laravel-medialibrary' => 'Media Library - Associate files with Eloquent models',
-            'spatie/laravel-activitylog' => 'Activity Log - Log activity inside your Laravel app'
+            'spatie/laravel-activitylog' => 'Activity Log - Log activity inside your Laravel app',
         ];
 
         $selected = [];
-        
+
         $this->info('Available Spatie packages:');
         foreach ($availablePackages as $package => $description) {
             if ($this->confirm("Install {$description}?")) {
@@ -97,12 +97,13 @@ class InstallSpatiePackages extends Command
     private function installPackage(string $package, string $name): void
     {
         $this->info("📦 Installing {$name} ({$package})...");
-        
+
         $result = Process::run("composer require {$package}");
-        
+
         if ($result->failed()) {
             $this->error("❌ Failed to install {$name}");
             $this->error($result->errorOutput());
+
             return;
         }
 

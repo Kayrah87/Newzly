@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Process;
 
 class InstallFrontend extends Command
 {
@@ -61,7 +61,7 @@ class InstallFrontend extends Command
             'autoprefixer',
             'postcss',
             'vite',
-            'laravel-vite-plugin'
+            'laravel-vite-plugin',
         ];
 
         if ($this->option('tailwind4')) {
@@ -70,11 +70,12 @@ class InstallFrontend extends Command
             $packages[] = 'tailwindcss';
         }
 
-        $result = Process::run('npm install ' . implode(' ', $packages) . ' --save-dev');
-        
+        $result = Process::run('npm install '.implode(' ', $packages).' --save-dev');
+
         if ($result->failed()) {
             $this->error('❌ Failed to install NPM packages');
             $this->error($result->errorOutput());
+
             return;
         }
 

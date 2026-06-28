@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Process;
 
 class CreateTestData extends Command
 {
@@ -324,12 +324,13 @@ PHP;
     private function runSeeders(): void
     {
         $this->info('🚀 Running seeders...');
-        
+
         $result = Process::run('php artisan db:seed');
-        
+
         if ($result->failed()) {
             $this->error('❌ Failed to run seeders');
             $this->error($result->errorOutput());
+
             return;
         }
 

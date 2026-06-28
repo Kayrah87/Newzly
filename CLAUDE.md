@@ -168,10 +168,13 @@ relevant installer. Check `composer.json` before assuming a package is available
 - Default DB is **SQLite** (`database/database.sqlite`); session, cache, and queue
   drivers all default to `database` (`.env.example`).
 - Issue/story content is stored as HTML (WYSIWYG editor); `content` columns are
-  `longText`/nullable. The editor is currently **TinyMCE via the no-api-key CDN**
-  (`@push('scripts')` blocks in the issue/story create/edit forms, bound to `#content`).
-  **TODO / planned:** swap TinyMCE for the **free, open-source Tiptap** editor (self-hosted
-  via Vite, no CDN/API key) across those four forms.
+  `longText`/nullable. The editor is the **free, open-source Tiptap** editor, self-hosted
+  via Vite (no CDN/API key). It is a reusable Blade component `<x-wysiwyg-editor name="…"
+  :value="…">` (`resources/views/components/wysiwyg-editor.blade.php`) backed by the
+  `wysiwyg` Alpine component (`resources/js/wysiwyg.js`, registered in `resources/js/app.js`).
+  It mirrors its HTML into a hidden `<textarea>` so forms still post `content`; used by all
+  four issue/story create/edit forms. (A future drag-and-drop *block* editor is a separate,
+  larger effort — structured-JSON blocks, not a free-form builder.)
 - Foreign keys cascade on delete (deleting a publication removes its issues, stories via
   the chain, and pivot rows).
 - **Public uploads** (publication logos; later story photos) go on the disk named by

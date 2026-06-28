@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Str;
+use Pdo\Mysql;
 
 return [
     'default' => env('DB_CONNECTION', 'sqlite'),
@@ -32,7 +33,7 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 // PDO::MYSQL_ATTR_SSL_CA is deprecated in PHP 8.4; use the namespaced
                 // Pdo\Mysql constant there while staying compatible with PHP 8.3.
-                (PHP_VERSION_ID >= 80400 ? \Pdo\Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+                (PHP_VERSION_ID >= 80400 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
 

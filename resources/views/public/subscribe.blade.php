@@ -1,5 +1,6 @@
 <x-public-layout :publication="$publication" title="Subscribe">
-    <h2 class="text-lg font-semibold mb-4">Subscribe</h2>
+    <span class="np-kicker">Join the list</span>
+    <h2 class="font-display text-2xl font-bold text-ink mt-1 mb-4">Subscribe</h2>
 
     <form method="POST" action="{{ route('public.subscribe.store', ['publication' => $publication->slug]) }}" class="space-y-4">
         @csrf
@@ -23,8 +24,8 @@
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
-        <label class="flex items-start gap-2 text-sm text-gray-600">
-            <input type="checkbox" name="consent" value="1" class="mt-1 rounded border-gray-300 text-indigo-600" required>
+        <label class="flex items-start gap-2 text-sm text-ink-soft">
+            <input type="checkbox" name="consent" value="1" class="mt-1 rounded border-ink/30 text-press-600 focus:ring-press-500" required>
             <span>I agree to receive {{ $publication->name }} by email and understand I can unsubscribe at any time.</span>
         </label>
         <x-input-error :messages="$errors->get('consent')" class="mt-2" />

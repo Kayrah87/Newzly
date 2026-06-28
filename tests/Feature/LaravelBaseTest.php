@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -9,11 +10,11 @@ test('laravel base installation is working', function () {
 });
 
 test('database connection works', function () {
-    expect(\DB::connection()->getDatabaseName())->not()->toBeNull();
+    expect(DB::connection()->getDatabaseName())->not()->toBeNull();
 });
 
 test('user model can be created', function () {
-    $user = \App\Models\User::factory()->create([
+    $user = User::factory()->create([
         'name' => 'Test User',
         'email' => 'test@example.com',
     ]);
@@ -23,8 +24,8 @@ test('user model can be created', function () {
 });
 
 test('custom console commands are registered', function () {
-    $commands = collect(\Artisan::all())->keys()->toArray();
-    
+    $commands = collect(Artisan::all())->keys()->toArray();
+
     expect($commands)->toContain('install:spatie-packages');
     expect($commands)->toContain('install:livewire');
     expect($commands)->toContain('install:frontend');
@@ -35,7 +36,7 @@ test('custom console commands are registered', function () {
 
 test('welcome page returns successfully', function () {
     $response = $this->get('/');
-    
+
     $response->assertStatus(200);
     $response->assertSee('Newzly');
 });

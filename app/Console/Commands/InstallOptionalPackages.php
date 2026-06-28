@@ -34,43 +34,43 @@ class InstallOptionalPackages extends Command
             'multitenancy' => [
                 'package' => 'spatie/laravel-multitenancy',
                 'name' => 'Spatie Multi Tenancy',
-                'description' => 'Multi-tenant applications made easy'
+                'description' => 'Multi-tenant applications made easy',
             ],
             'filament' => [
                 'package' => 'filament/filament',
                 'name' => 'Filament Admin Panel',
-                'description' => 'Beautiful admin panel for Laravel'
+                'description' => 'Beautiful admin panel for Laravel',
             ],
             'socialite' => [
                 'package' => 'laravel/socialite',
                 'name' => 'Laravel Socialite',
-                'description' => 'OAuth authentication with social providers'
+                'description' => 'OAuth authentication with social providers',
             ],
             'cashier-stripe' => [
                 'package' => 'laravel/cashier',
                 'name' => 'Laravel Cashier (Stripe)',
-                'description' => 'Stripe billing integration'
+                'description' => 'Stripe billing integration',
             ],
             'telescope' => [
                 'package' => 'laravel/telescope',
                 'name' => 'Laravel Telescope',
-                'description' => 'Debug assistant for Laravel'
+                'description' => 'Debug assistant for Laravel',
             ],
             'horizon' => [
                 'package' => 'laravel/horizon',
                 'name' => 'Laravel Horizon',
-                'description' => 'Queue monitoring dashboard'
+                'description' => 'Queue monitoring dashboard',
             ],
             'octane' => [
                 'package' => 'laravel/octane',
                 'name' => 'Laravel Octane',
-                'description' => 'Supercharge application performance'
+                'description' => 'Supercharge application performance',
             ],
             'blueprint' => [
                 'package' => 'laravel-shift/blueprint',
                 'name' => 'Laravel Blueprint',
-                'description' => 'Code generation tool'
-            ]
+                'description' => 'Code generation tool',
+            ],
         ];
 
         $selected = [];
@@ -82,6 +82,7 @@ class InstallOptionalPackages extends Command
 
         if (empty($selected)) {
             $this->info('No packages selected. Goodbye! 👋');
+
             return;
         }
 
@@ -97,12 +98,13 @@ class InstallOptionalPackages extends Command
     private function installPackage(string $key, array $package): void
     {
         $this->info("📦 Installing {$package['name']}...");
-        
+
         $result = Process::run("composer require {$package['package']}");
-        
+
         if ($result->failed()) {
             $this->error("❌ Failed to install {$package['name']}");
             $this->error($result->errorOutput());
+
             return;
         }
 
@@ -200,7 +202,7 @@ class InstallOptionalPackages extends Command
     private function setupOctane(): void
     {
         $this->info('🔧 Setting up Octane...');
-        
+
         $server = $this->choice('Choose Octane server:', [
             'swoole' => 'Swoole (recommended)',
             'roadrunner' => 'RoadRunner',
@@ -208,7 +210,7 @@ class InstallOptionalPackages extends Command
 
         Process::run("php artisan octane:install --server={$server}");
         $this->info("  • Octane installed with {$server} server");
-        $this->info("  • Start with: php artisan octane:start");
+        $this->info('  • Start with: php artisan octane:start');
     }
 
     private function setupBlueprint(): void
