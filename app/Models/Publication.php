@@ -99,10 +99,20 @@ class Publication extends Model
      */
     public function hasSmtpConfigured(): bool
     {
-        return filled($this->smtp_host)
-            && filled($this->smtp_port)
-            && filled($this->smtp_username)
-            && filled($this->smtp_password);
+        return filled($this->smtp_host) && filled($this->smtp_port);
+    }
+
+    /**
+     * Whether any SMTP field is filled but host/port are not both present. In this
+     * state the publication silently falls back to the platform mailer (auth alone
+     * is not enough to route mail), so the UI should warn.
+     */
+    public function hasPartialSmtp(): bool
+    {
+        $anyFilled = collect([$this->smtp_host, $this->smtp_port, $this->smtp_username, $this->smtp_password])
+            ->contains(fn ($value) => filled($value));
+
+        return $anyFilled && ! $this->hasSmtpConfigured();
     }
 
     /**

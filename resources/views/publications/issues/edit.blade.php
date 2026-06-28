@@ -6,6 +6,13 @@
                 {{ __('Edit Issue') }}
             </h2>
         </div>
+        <x-breadcrumbs :items="[
+            ['label' => 'Publications', 'url' => route('publications.index')],
+            ['label' => $publication->name, 'url' => route('publications.show', $publication)],
+            ['label' => 'Issues', 'url' => route('publications.issues.index', $publication)],
+            ['label' => $issue->title, 'url' => route('publications.issues.show', [$publication, $issue])],
+            ['label' => 'Edit', 'url' => null],
+        ]" />
     </x-slot>
 
     <div class="py-12">

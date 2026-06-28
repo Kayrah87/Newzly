@@ -46,10 +46,16 @@ Route::middleware('auth')->group(function () {
     Route::resource('publications.issues', IssueController::class)->scoped()->except(['index']);
     Route::get('publications/{publication}/issues', [IssueController::class, 'index'])->name('publications.issues.index');
 
-    // Send an issue to confirmed subscribers
+    // Send an issue to confirmed subscribers (now, or on a schedule)
     Route::post('publications/{publication}/issues/{issue}/send', [IssueController::class, 'send'])
         ->scopeBindings()
         ->name('publications.issues.send');
+    Route::post('publications/{publication}/issues/{issue}/schedule', [IssueController::class, 'schedule'])
+        ->scopeBindings()
+        ->name('publications.issues.schedule');
+    Route::post('publications/{publication}/issues/{issue}/unschedule', [IssueController::class, 'unschedule'])
+        ->scopeBindings()
+        ->name('publications.issues.unschedule');
 
     // Browser preview of an issue (rendered with the publication's layout + palette)
     Route::get('publications/{publication}/issues/{issue}/preview', [IssueController::class, 'preview'])

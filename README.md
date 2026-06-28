@@ -69,11 +69,24 @@ php artisan db:seed                      # seeds the super admin (admin@newzly.t
 php artisan storage:link                 # local media (logos, photos)
 ```
 
-### Run it (two terminals)
+### Run it
+
+One command starts the backend server, queue worker, and Vite dev server together:
 
 ```bash
-php artisan serve     # backend
-npm run dev           # Vite dev server (HMR)
+composer run dev      # php artisan serve + queue:listen + npm run dev
+```
+
+Ctrl-C stops all three. (It uses `npx concurrently` under the hood — no extra
+dependency to install.) Prefer this in development: the queue runs via
+`queue:listen`, which auto-reloads your code, unlike `queue:work`.
+
+Prefer separate terminals? Run the pieces yourself:
+
+```bash
+php artisan serve                    # backend
+php artisan queue:listen --tries=1   # queue worker (issue sends, emails)
+npm run dev                          # Vite dev server (HMR)
 ```
 
 The platform super admin defaults to `admin@newzly.test` / `password` (override with

@@ -25,10 +25,14 @@ cp .env.example .env && php artisan key:generate
 touch database/database.sqlite        # default DB is SQLite
 php artisan migrate
 
-# Dev: run these in two terminals
-php artisan serve                     # backend
-npm run dev                           # Vite dev server (HMR)
+# Dev: one command runs server + queue + Vite together (via npx concurrently)
+composer run dev                      # php artisan serve + queue:listen + npm run dev
 npm run build                         # production assets
+
+# Or run the pieces individually (e.g. in separate terminals)
+php artisan serve                     # backend
+php artisan queue:listen --tries=1    # queue worker (auto-reloads code; prefer over queue:work in dev)
+npm run dev                           # Vite dev server (HMR)
 
 # Tests (Pest)
 php artisan test                      # full suite

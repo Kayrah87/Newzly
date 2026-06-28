@@ -13,13 +13,29 @@ class IssueController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Publication $publication)
+    public function index(Request $request, Publication $publication)
     {
         $this->authorize('view', $publication);
 
-        $issues = $publication->issues()->latest()->paginate(10);
+        $sortable = ['title', 'status', 'issue_number', 'release_date', 'created_at'];
 
-        return view('publications.issues.index', compact('publication', 'issues'));
+        $sort = in_array($request->query('sort'), $sortable, true) ? $request->query('sort') : 'created_at';
+        $direction = $request->query('direction') === 'asc' ? 'asc' : 'desc';
+        $search = trim((string) $request->query('search', ''));
+
+        $issues = $publication->issues()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('title', 'like', "%{$search}%")
+                        ->orWhere('coverage_label', 'like', "%{$search}%")
+                        ->orWhere('issue_number', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy($sort, $direction)
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('publications.issues.index', compact('publication', 'issues', 'sort', 'direction', 'search'));
     }
 
     /**
@@ -187,5 +203,52 @@ class IssueController extends Controller
 
         return redirect()->route('publications.issues.show', [$publication, $issue])
             ->with('success', 'Issue queued for sending to confirmed subscribers.');
+    }
+
+    /**
+     * Schedule this issue to send automatically at a future time. The
+     * issues:send-scheduled command dispatches it once that time arrives.
+     */
+    public function schedule(Request $request, Publication $publication, Issue $issue)
+    {
+        $this->authorize('update', $publication);
+
+        if ($issue->isSent()) {
+            return redirect()->route('publications.issues.show', [$publication, $issue])
+                ->with('error', 'This issue has already been sent.');
+        }
+
+        $validated = $request->validate([
+            'published_at' => 'required|date|after:now',
+        ]);
+
+        $issue->update([
+            'status' => 'scheduled',
+            'published_at' => $validated['published_at'],
+        ]);
+
+        return redirect()->route('publications.issues.show', [$publication, $issue])
+            ->with('success', 'Issue scheduled to send on '.$issue->published_at->format('M j, Y g:i A').'.');
+    }
+
+    /**
+     * Cancel a pending schedule and return the issue to draft.
+     */
+    public function unschedule(Publication $publication, Issue $issue)
+    {
+        $this->authorize('update', $publication);
+
+        if ($issue->isSent()) {
+            return redirect()->route('publications.issues.show', [$publication, $issue])
+                ->with('error', 'This issue has already been sent.');
+        }
+
+        $issue->update([
+            'status' => 'draft',
+            'published_at' => null,
+        ]);
+
+        return redirect()->route('publications.issues.show', [$publication, $issue])
+            ->with('success', 'Schedule cancelled — the issue is back to draft.');
     }
 }
