@@ -136,6 +136,53 @@ test('a publication without smtp falls back to the default mailer', function () 
         ->and($publication->configuredMailerName())->toBe(config('mail.default'));
 });
 
+test('a configured publication resolves a mailer pointed at its own smtp host', function () {
+    $publication = Publication::factory()->create([
+        'smtp_host' => 'smtp.publication.example',
+        'smtp_port' => 587,
+        'smtp_username' => 'mailer@publication.example',
+        'smtp_password' => 'secret',
+        'smtp_encryption' => 'tls',
+    ]);
+
+    $transport = Mail::mailer($publication->configuredMailerName())->getSymfonyTransport();
+
+    // The resolved transport targets the publication's server, not the app default.
+    expect($publication->configuredMailerName())->toBe('publication_'.$publication->id)
+        ->and((string) $transport)->toContain('smtp.publication.example:587');
+});
+
+test('a publication with host and port but no auth sends through its own smtp', function () {
+    // Mirrors a local Mailpit / authless relay: host + port, no username/password.
+    $publication = Publication::factory()->create([
+        'smtp_host' => 'localhost',
+        'smtp_port' => 1025,
+        'smtp_username' => null,
+        'smtp_password' => null,
+        'smtp_encryption' => null,
+    ]);
+
+    expect($publication->hasSmtpConfigured())->toBeTrue()
+        ->and($publication->hasPartialSmtp())->toBeFalse()
+        ->and($publication->configuredMailerName())->toBe('publication_'.$publication->id);
+
+    $transport = Mail::mailer($publication->configuredMailerName())->getSymfonyTransport();
+    expect((string) $transport)->toContain('localhost:1025');
+});
+
+test('a publication with auth but no host is flagged as partial and falls back', function () {
+    $publication = Publication::factory()->create([
+        'smtp_host' => null,
+        'smtp_port' => null,
+        'smtp_username' => 'mailer@example.com',
+        'smtp_password' => 'secret',
+    ]);
+
+    expect($publication->hasSmtpConfigured())->toBeFalse()
+        ->and($publication->hasPartialSmtp())->toBeTrue()
+        ->and($publication->configuredMailerName())->toBe(config('mail.default'));
+});
+
 test('an editor can schedule an issue to send later', function () {
     [$publication, $issue] = publicationWithIssue();
 

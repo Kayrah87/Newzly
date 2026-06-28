@@ -13,13 +13,29 @@ class IssueController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Publication $publication)
+    public function index(Request $request, Publication $publication)
     {
         $this->authorize('view', $publication);
 
-        $issues = $publication->issues()->latest()->paginate(10);
+        $sortable = ['title', 'status', 'issue_number', 'release_date', 'created_at'];
 
-        return view('publications.issues.index', compact('publication', 'issues'));
+        $sort = in_array($request->query('sort'), $sortable, true) ? $request->query('sort') : 'created_at';
+        $direction = $request->query('direction') === 'asc' ? 'asc' : 'desc';
+        $search = trim((string) $request->query('search', ''));
+
+        $issues = $publication->issues()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('title', 'like', "%{$search}%")
+                        ->orWhere('coverage_label', 'like', "%{$search}%")
+                        ->orWhere('issue_number', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy($sort, $direction)
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('publications.issues.index', compact('publication', 'issues', 'sort', 'direction', 'search'));
     }
 
     /**

@@ -16,6 +16,10 @@
                 </a>
             </div>
         </div>
+        <x-breadcrumbs :items="[
+            ['label' => 'Publications', 'url' => route('publications.index')],
+            ['label' => $publication->name, 'url' => null],
+        ]" />
     </x-slot>
 
     <div class="py-12">

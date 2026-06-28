@@ -36,6 +36,12 @@
                 @endcan
             </div>
         </div>
+        <x-breadcrumbs :items="[
+            ['label' => 'Publications', 'url' => route('publications.index')],
+            ['label' => $publication->name, 'url' => route('publications.show', $publication)],
+            ['label' => 'Issues', 'url' => route('publications.issues.index', $publication)],
+            ['label' => $issue->title, 'url' => null],
+        ]" />
     </x-slot>
 
     <div class="py-12">

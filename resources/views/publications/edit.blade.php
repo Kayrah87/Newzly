@@ -6,6 +6,11 @@
                 {{ __('Edit Publication') }}
             </h2>
         </div>
+        <x-breadcrumbs :items="[
+            ['label' => 'Publications', 'url' => route('publications.index')],
+            ['label' => $publication->name, 'url' => route('publications.show', $publication)],
+            ['label' => 'Edit', 'url' => null],
+        ]" />
     </x-slot>
 
     <div class="py-12">
@@ -101,11 +106,17 @@
                         <div class="np-rule my-6 pt-6">
                             <h3 class="font-display text-lg font-bold mb-1">{{ __('Email delivery (SMTP)') }}</h3>
                             <p class="text-sm text-ink-soft mb-4">
-                                {{ __('Optional. When set, issues are sent through your own SMTP server. Leave blank to use the platform default.') }}
+                                {{ __('Optional. Set a host and port to send issues through your own SMTP server (username and password only if it requires authentication). Leave blank to use the platform default.') }}
                                 @if($publication->hasSmtpConfigured())
                                     <span class="np-badge-press">SMTP is configured</span>
                                 @endif
                             </p>
+
+                            @if($publication->hasPartialSmtp())
+                                <div class="mb-4 rounded border border-amber-400 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                                    {{ __('Both host and port are required to send through your own SMTP server (username and password are optional for servers that do not need authentication). Until host and port are set, issues are sent using the platform default mailer.') }}
+                                </div>
+                            @endif
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
