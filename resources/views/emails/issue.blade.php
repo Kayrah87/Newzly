@@ -1,41 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
     <title>{{ $issue->title }}</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    {{-- Progressive enhancement only. Every critical style is also inlined so
+         clients that strip <style> (e.g. some Gmail contexts) stay readable. --}}
+    <style type="text/css">
+        body { margin:0 !important; padding:0 !important; width:100% !important; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+        table { border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; }
+        img { border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; }
+        a { color:#2563eb; }
+        /* Normalise WYSIWYG (Tiptap) body content for email readability. */
+        .story-content p { margin:0 0 12px 0; }
+        .story-content h2, .story-content h3 { margin:0 0 8px 0; line-height:1.3; color:#111827; }
+        .story-content ul, .story-content ol { margin:0 0 12px 0; padding-left:20px; }
+        .story-content li { margin:0 0 4px 0; }
+        .story-content blockquote { margin:0 0 12px 0; padding:0 0 0 12px; border-left:3px solid #e5e7eb; color:#6b7280; }
+        .story-content a { color:#2563eb; }
+        .story-content img { max-width:100% !important; height:auto !important; }
+        .story-content > *:last-child { margin-bottom:0 !important; }
+        @media only screen and (max-width:600px) {
+            .email-container { width:100% !important; }
+            .email-pad { padding-left:16px !important; padding-right:16px !important; }
+        }
+    </style>
 </head>
 <body style="margin:0; padding:0; background:#f3f4f6; font-family:Arial, Helvetica, sans-serif; color:#111827;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6; padding:24px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f3f4f6" style="background:#f3f4f6; mso-table-lspace:0pt; mso-table-rspace:0pt;">
         <tr>
-            <td align="center">
-                <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px; max-width:100%; background:#ffffff; border-radius:8px; overflow:hidden;">
+            <td align="center" style="padding:24px 12px;">
+                <!--[if mso]>
+                <table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td>
+                <![endif]-->
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" class="email-container" style="width:600px; max-width:100%; background:#ffffff; border-radius:8px; overflow:hidden; mso-table-lspace:0pt; mso-table-rspace:0pt;">
                     {{-- Header --}}
                     <tr>
-                        <td style="padding:24px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                        <td class="email-pad" style="padding:24px; text-align:center; border-bottom:1px solid #e5e7eb;">
                             @if($publication->logoUrl())
-                                <img src="{{ $publication->logoUrl() }}" alt="{{ $publication->name }}" height="48" style="height:48px;">
+                                <img src="{{ $publication->logoUrl() }}" alt="{{ $publication->name }}" height="48" style="display:inline-block; height:48px; border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic;">
                             @endif
-                            <h1 style="margin:8px 0 0; font-size:20px;">{{ $publication->name }}</h1>
-                            <p style="margin:4px 0 0; color:#6b7280; font-size:14px;">{{ $issue->title }}</p>
+                            <h1 style="margin:8px 0 0; font-family:Arial,Helvetica,sans-serif; font-size:20px; line-height:26px; mso-line-height-rule:exactly; color:#111827;">{{ $publication->name }}</h1>
+                            <p style="margin:4px 0 0; font-family:Arial,Helvetica,sans-serif; color:#6b7280; font-size:14px; line-height:20px;">{{ $issue->title }}</p>
                         </td>
                     </tr>
 
                     {{-- Stories --}}
                     <tr>
-                        <td style="padding:24px;">
+                        <td class="email-pad" style="padding:24px;">
                             @forelse($stories as $story)
                                 @include('emails.stories.'.($story->layout ?? 'standard'), ['story' => $story])
                             @empty
-                                <p style="color:#6b7280;">This issue has no stories yet.</p>
+                                <p style="margin:0; font-family:Arial,Helvetica,sans-serif; color:#6b7280; font-size:15px; line-height:24px;">This issue has no stories yet.</p>
                             @endforelse
                         </td>
                     </tr>
 
                     {{-- Mandatory unsubscribe footer (GDPR) --}}
                     <tr>
-                        <td style="padding:24px; border-top:1px solid #e5e7eb; text-align:center; color:#9ca3af; font-size:12px;">
-                            <p style="margin:0 0 8px;">You're receiving this because you subscribed to {{ $publication->name }}.</p>
+                        <td class="email-pad" style="padding:24px; border-top:1px solid #e5e7eb; text-align:center; font-family:Arial,Helvetica,sans-serif; color:#9ca3af; font-size:12px; line-height:18px;">
+                            <p style="margin:0 0 8px 0;">You're receiving this because you subscribed to {{ $publication->name }}.</p>
                             <p style="margin:0;">
                                 <a href="{{ $unsubscribeUrl }}" style="color:#6b7280; text-decoration:underline;">Unsubscribe</a>
                                 @if($publication->website_url)
@@ -45,7 +81,10 @@
                         </td>
                     </tr>
                 </table>
-                <p style="color:#9ca3af; font-size:11px; margin-top:16px;">Powered by Newzly</p>
+                <!--[if mso]>
+                </td></tr></table>
+                <![endif]-->
+                <p style="font-family:Arial,Helvetica,sans-serif; color:#9ca3af; font-size:11px; line-height:16px; margin:16px 0 0 0;">Powered by Newzly</p>
             </td>
         </tr>
     </table>
