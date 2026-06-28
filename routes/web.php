@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BlockController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\ProfileController;
@@ -55,14 +56,17 @@ Route::middleware('auth')->group(function () {
         ->scopeBindings()
         ->name('publications.issues.preview');
 
-    // Drag-and-drop reorder of an issue's stories (defined before the resource
-    // so "stories/reorder" isn't captured by the "stories/{story}" routes).
-    Route::patch('publications/{publication}/issues/{issue}/stories/reorder', [StoryController::class, 'reorder'])
+    // Drag-and-drop reorder of an issue's content stream (stories + blocks).
+    Route::patch('publications/{publication}/issues/{issue}/reorder', [IssueController::class, 'reorder'])
         ->scopeBindings()
-        ->name('publications.issues.stories.reorder');
+        ->name('publications.issues.reorder');
 
     // Story routes (scoped to publication + issue)
     Route::resource('publications.issues.stories', StoryController::class)->scoped()->except(['index', 'show']);
+
+    // Content blocks (events, …) — scoped to publication + issue
+    Route::resource('publications.issues.blocks', BlockController::class)
+        ->scoped()->only(['create', 'store', 'edit', 'update', 'destroy']);
 
     // Public submission moderation queue (scoped to publication)
     Route::get('publications/{publication}/submissions', [SubmissionController::class, 'index'])->name('publications.submissions.index');

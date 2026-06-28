@@ -13,6 +13,23 @@
                     <a href="{{ route('publications.issues.edit', [$publication, $issue]) }}" class="np-btn-outline">Edit</a>
                 @endcan
                 @can('manageStories', $publication)
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            <button type="button" class="np-btn-outline">
+                                Add Block
+                                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </x-slot>
+                        <x-slot name="content">
+                            @foreach(\App\Models\Block::TYPE_LABELS as $blockType => $blockLabel)
+                                <x-dropdown-link :href="route('publications.issues.blocks.create', [$publication, $issue, 'type' => $blockType])">
+                                    {{ $blockLabel }}
+                                </x-dropdown-link>
+                            @endforeach
+                        </x-slot>
+                    </x-dropdown>
                     <a href="{{ route('publications.issues.stories.create', [$publication, $issue]) }}" class="np-btn-primary">
                         Add Story
                     </a>
@@ -51,16 +68,16 @@
                         </div>
                     </div>
 
-                    <!-- Stories -->
+                    <!-- Content stream: stories + blocks -->
                     <div class="np-card"
                         @can('manageStories', $publication)
-                            x-data="sortable({ url: '{{ route('publications.issues.stories.reorder', [$publication, $issue]) }}' })"
+                            x-data="sortable({ url: '{{ route('publications.issues.reorder', [$publication, $issue]) }}' })"
                         @endcan>
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="font-display text-lg font-bold">Stories</h3>
+                                <h3 class="font-display text-lg font-bold">Content</h3>
                                 @can('manageStories', $publication)
-                                    @if($issue->stories->count() > 1)
+                                    @if($items->count() > 1)
                                         <div class="flex items-center gap-2 text-xs">
                                             <span class="text-ink-soft uppercase tracking-wide">Drag to reorder</span>
                                             <span x-show="saved" x-cloak x-transition class="np-badge-press">Order saved</span>
@@ -69,48 +86,91 @@
                                     @endif
                                 @endcan
                             </div>
-                            @if($issue->stories->count() > 0)
+                            @if($items->count() > 0)
                                 <div class="space-y-3" x-ref="list"
                                      @dragstart="start($event)" @dragover="over($event)" @drop="drop($event)" @dragend="end($event)">
-                                    @foreach($issue->stories as $story)
-                                        <div class="border border-ink/15 bg-white p-4 flex gap-3 transition-shadow hover:shadow-sm"
-                                            @can('manageStories', $publication)
-                                                data-sort-item draggable="true" data-sort-id="{{ $story->id }}"
-                                            @endcan>
-                                            @can('manageStories', $publication)
-                                                <span class="text-ink-soft/60 select-none cursor-grab active:cursor-grabbing pt-1 leading-none text-lg" title="Drag to reorder" aria-hidden="true">⠿</span>
-                                            @endcan
-                                            <div class="flex-1 min-w-0">
-                                                <div class="flex justify-between items-start mb-2 gap-2">
-                                                    <h4 class="font-display font-bold text-lg text-ink">{{ $story->title }}</h4>
-                                                    @can('manageStories', $publication)
-                                                        <div class="flex items-center gap-3 text-sm font-semibold shrink-0">
-                                                            <a href="{{ route('publications.issues.stories.edit', [$publication, $issue, $story]) }}" class="text-ink-soft hover:text-ink">Edit</a>
-                                                            <form method="POST" action="{{ route('publications.issues.stories.destroy', [$publication, $issue, $story]) }}" class="inline" onsubmit="return confirm('Are you sure?');">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="text-press-600 hover:text-press-700">Delete</button>
-                                                            </form>
-                                                        </div>
-                                                    @endcan
-                                                </div>
-                                                <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink-soft mb-2">
-                                                    <span>By {{ $story->author->name ?? 'Unknown' }}</span>
-                                                    <span class="np-badge-ink">{{ str_replace('_', ' ', $story->layout) }}</span>
-                                                    <span class="np-badge-{{ $story->status === 'approved' ? 'press' : 'ink' }}">{{ ucfirst($story->status) }}</span>
-                                                    @if($story->images->isNotEmpty())
-                                                        <span>{{ $story->images->count() }} image(s)</span>
+                                    @foreach($items as $item)
+                                        @if($item instanceof \App\Models\Block)
+                                            {{-- Events block row --}}
+                                            <div class="border border-ink/15 border-l-4 border-l-press-600 bg-white p-4 flex gap-3 transition-shadow hover:shadow-sm"
+                                                @can('manageStories', $publication)
+                                                    data-sort-item draggable="true" data-sort-id="block:{{ $item->id }}"
+                                                @endcan>
+                                                @can('manageStories', $publication)
+                                                    <span class="text-ink-soft/60 select-none cursor-grab active:cursor-grabbing pt-1 leading-none text-lg" title="Drag to reorder" aria-hidden="true">⠿</span>
+                                                @endcan
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex justify-between items-start mb-2 gap-2">
+                                                        <h4 class="font-display font-bold text-lg text-ink">{{ $item->title ?: 'Events' }}</h4>
+                                                        @can('manageStories', $publication)
+                                                            <div class="flex items-center gap-3 text-sm font-semibold shrink-0">
+                                                                <a href="{{ route('publications.issues.blocks.edit', [$publication, $issue, $item]) }}" class="text-ink-soft hover:text-ink">Edit</a>
+                                                                <form method="POST" action="{{ route('publications.issues.blocks.destroy', [$publication, $issue, $item]) }}" class="inline" onsubmit="return confirm('Remove this block?');">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="text-press-600 hover:text-press-700">Delete</button>
+                                                                </form>
+                                                            </div>
+                                                        @endcan
+                                                    </div>
+                                                    <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink-soft mb-2">
+                                                        <span class="np-badge-press">Events block</span>
+                                                        <span class="np-badge-ink">{{ \App\Models\Block::TITLE_STYLES[$item->title_style] ?? $item->title_style }}</span>
+                                                        <span>{{ $item->events->count() }} event(s)</span>
+                                                    </p>
+                                                    @if($item->events->isNotEmpty())
+                                                        <ul class="text-sm text-ink-soft list-disc ms-5">
+                                                            @foreach($item->events->take(3) as $event)
+                                                                <li>{{ $event->date?->format('jS M') }}{{ $event->date ? ' — ' : '' }}{{ $event->name }}</li>
+                                                            @endforeach
+                                                            @if($item->events->count() > 3)
+                                                                <li>+{{ $item->events->count() - 3 }} more…</li>
+                                                            @endif
+                                                        </ul>
                                                     @endif
-                                                </p>
-                                                <div class="prose max-w-none">
-                                                    {!! Str::limit($story->content, 300) !!}
                                                 </div>
                                             </div>
-                                        </div>
+                                        @else
+                                            {{-- Story row --}}
+                                            <div class="border border-ink/15 bg-white p-4 flex gap-3 transition-shadow hover:shadow-sm"
+                                                @can('manageStories', $publication)
+                                                    data-sort-item draggable="true" data-sort-id="story:{{ $item->id }}"
+                                                @endcan>
+                                                @can('manageStories', $publication)
+                                                    <span class="text-ink-soft/60 select-none cursor-grab active:cursor-grabbing pt-1 leading-none text-lg" title="Drag to reorder" aria-hidden="true">⠿</span>
+                                                @endcan
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex justify-between items-start mb-2 gap-2">
+                                                        <h4 class="font-display font-bold text-lg text-ink">{{ $item->title }}</h4>
+                                                        @can('manageStories', $publication)
+                                                            <div class="flex items-center gap-3 text-sm font-semibold shrink-0">
+                                                                <a href="{{ route('publications.issues.stories.edit', [$publication, $issue, $item]) }}" class="text-ink-soft hover:text-ink">Edit</a>
+                                                                <form method="POST" action="{{ route('publications.issues.stories.destroy', [$publication, $issue, $item]) }}" class="inline" onsubmit="return confirm('Are you sure?');">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="text-press-600 hover:text-press-700">Delete</button>
+                                                                </form>
+                                                            </div>
+                                                        @endcan
+                                                    </div>
+                                                    <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink-soft mb-2">
+                                                        <span>By {{ $item->author->name ?? 'Unknown' }}</span>
+                                                        <span class="np-badge-ink">{{ str_replace('_', ' ', $item->layout) }}</span>
+                                                        <span class="np-badge-{{ $item->status === 'approved' ? 'press' : 'ink' }}">{{ ucfirst($item->status) }}</span>
+                                                        @if($item->images->isNotEmpty())
+                                                            <span>{{ $item->images->count() }} image(s)</span>
+                                                        @endif
+                                                    </p>
+                                                    <div class="prose max-w-none">
+                                                        {!! Str::limit(strip_tags($item->content), 300) !!}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
                                     @endforeach
                                 </div>
                             @else
-                                <p class="text-ink-soft">No stories added yet. Add your first story to get started!</p>
+                                <p class="text-ink-soft">No content yet. Add a story or an events block to get started!</p>
                             @endif
                         </div>
                     </div>

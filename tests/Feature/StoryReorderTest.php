@@ -29,13 +29,13 @@ function issueWithThreeStories(): array
     return [$publication, $issue, $stories];
 }
 
-test('an editor can reorder an issue\'s stories', function () {
+test('an editor can reorder an issue\'s content', function () {
     [$publication, $issue, $stories] = issueWithThreeStories();
     [$one, $two, $three] = [$stories[0], $stories[1], $stories[2]];
 
     $this->actingAs($publication->owner)
-        ->patchJson(route('publications.issues.stories.reorder', [$publication, $issue]), [
-            'order' => [$three->id, $one->id, $two->id],
+        ->patchJson(route('publications.issues.reorder', [$publication, $issue]), [
+            'order' => ["story:{$three->id}", "story:{$one->id}", "story:{$two->id}"],
         ])
         ->assertOk();
 
@@ -43,26 +43,24 @@ test('an editor can reorder an issue\'s stories', function () {
         ->and($one->fresh()->order)->toBe(2)
         ->and($two->fresh()->order)->toBe(3);
 
-    // The relation (ordered by `order`) now returns the new sequence.
     expect($issue->fresh()->stories->pluck('title')->all())
         ->toBe(['Three', 'One', 'Two']);
 });
 
-test('ids that do not belong to the issue are ignored', function () {
+test('tokens that do not belong to the issue are ignored', function () {
     [$publication, $issue, $stories] = issueWithThreeStories();
     [$one, $two, $three] = [$stories[0], $stories[1], $stories[2]];
     $foreign = Story::factory()->create(); // belongs to a different issue
 
     $this->actingAs($publication->owner)
-        ->patchJson(route('publications.issues.stories.reorder', [$publication, $issue]), [
-            'order' => [$two->id, $foreign->id, $three->id, $one->id],
+        ->patchJson(route('publications.issues.reorder', [$publication, $issue]), [
+            'order' => ["story:{$two->id}", "story:{$foreign->id}", "story:{$three->id}", "story:{$one->id}"],
         ])
         ->assertOk();
 
     expect($two->fresh()->order)->toBe(1)
         ->and($three->fresh()->order)->toBe(2)
         ->and($one->fresh()->order)->toBe(3)
-        // The foreign story is untouched.
         ->and($foreign->fresh()->order)->toBe($foreign->order);
 });
 
@@ -72,8 +70,8 @@ test('a member without manage-stories permission cannot reorder', function () {
     $publication->members()->attach($factChecker->id, ['role' => 'fact_checker']);
 
     $this->actingAs($factChecker)
-        ->patchJson(route('publications.issues.stories.reorder', [$publication, $issue]), [
-            'order' => $stories->pluck('id')->all(),
+        ->patchJson(route('publications.issues.reorder', [$publication, $issue]), [
+            'order' => $stories->map(fn ($s) => "story:{$s->id}")->all(),
         ])
         ->assertForbidden();
 });
@@ -82,8 +80,8 @@ test('an outsider cannot reorder', function () {
     [$publication, $issue, $stories] = issueWithThreeStories();
 
     $this->actingAs(User::factory()->create())
-        ->patchJson(route('publications.issues.stories.reorder', [$publication, $issue]), [
-            'order' => $stories->pluck('id')->all(),
+        ->patchJson(route('publications.issues.reorder', [$publication, $issue]), [
+            'order' => $stories->map(fn ($s) => "story:{$s->id}")->all(),
         ])
         ->assertForbidden();
 });
@@ -92,6 +90,6 @@ test('the order payload is required', function () {
     [$publication, $issue] = issueWithThreeStories();
 
     $this->actingAs($publication->owner)
-        ->patchJson(route('publications.issues.stories.reorder', [$publication, $issue]), [])
+        ->patchJson(route('publications.issues.reorder', [$publication, $issue]), [])
         ->assertStatus(422);
 });

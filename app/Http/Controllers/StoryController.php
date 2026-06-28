@@ -7,7 +7,6 @@ use App\Models\Publication;
 use App\Models\Story;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class StoryController extends Controller
@@ -90,36 +89,6 @@ class StoryController extends Controller
 
         return redirect()->route('publications.issues.show', [$publication, $issue])
             ->with('success', 'Story updated successfully!');
-    }
-
-    /**
-     * Persist a new drag-and-drop order for an issue's stories.
-     * Accepts { order: [storyId, …] } and writes each story's `order` to its
-     * position. Ignores any ids that don't belong to this issue.
-     */
-    public function reorder(Request $request, Publication $publication, Issue $issue)
-    {
-        $this->authorize('manageStories', $publication);
-
-        $validated = $request->validate([
-            'order' => 'required|array',
-            'order.*' => 'integer',
-        ]);
-
-        $storyIds = $issue->stories()->pluck('id')->all();
-
-        DB::transaction(function () use ($validated, $issue, $storyIds) {
-            $position = 0;
-            foreach ($validated['order'] as $storyId) {
-                if (! in_array((int) $storyId, $storyIds, true)) {
-                    continue;
-                }
-                $position++;
-                $issue->stories()->whereKey($storyId)->update(['order' => $position]);
-            }
-        });
-
-        return response()->json(['status' => 'ok']);
     }
 
     /**

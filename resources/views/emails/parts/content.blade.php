@@ -1,12 +1,16 @@
 {{--
-    Content section — the issue's stories, rendered in their own (reorderable)
-    order via the per-layout partials. No padding here: each story renders its
-    own full-bleed accent title banner + body block.
+    Content section — the issue's content stream (stories and blocks merged in
+    their shared, reorderable order). No padding here: each item renders its own
+    full-bleed section.
 --}}
 <tr>
     <td style="padding:0;">
-        @forelse($stories as $story)
-            @include('emails.stories.'.($story->layout ?? 'standard'), ['story' => $story])
+        @forelse($items as $item)
+            @if($item instanceof \App\Models\Block)
+                @include('emails.blocks.'.$item->type, ['block' => $item])
+            @else
+                @include('emails.stories.'.($item->layout ?? 'standard'), ['story' => $item])
+            @endif
         @empty
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="{{ $palette['body_bg'] }}" style="width:100%; border-collapse:collapse;">
                 <tr>

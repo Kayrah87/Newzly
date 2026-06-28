@@ -6,6 +6,7 @@ use App\Jobs\SendIssue;
 use App\Models\Issue;
 use App\Models\Publication;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class IssueController extends Controller
 {
@@ -61,9 +62,10 @@ class IssueController extends Controller
     {
         $this->authorize('view', $publication);
 
-        $issue->load('stories.author', 'stories.images');
+        $issue->load('stories.author', 'stories.images', 'blocks.events');
+        $items = $issue->orderedContent();
 
-        return view('publications.issues.show', compact('publication', 'issue'));
+        return view('publications.issues.show', compact('publication', 'issue', 'items'));
     }
 
     /**
@@ -123,16 +125,50 @@ class IssueController extends Controller
     {
         $this->authorize('view', $publication);
 
-        $issue->load('stories.images');
-
         return view('emails.issue', [
             'issue' => $issue,
             'publication' => $publication,
-            'stories' => $issue->stories,
+            'items' => $issue->orderedContent(),
             'structure' => $publication->structureOrder(),
             'palette' => $publication->paletteColors(),
             'unsubscribeUrl' => '#',
         ]);
+    }
+
+    /**
+     * Persist a new drag-and-drop order for the issue's content stream.
+     * Accepts { order: ["story:ID", "block:ID", …] } so stories and blocks can
+     * be interleaved. Tokens that don't belong to this issue are ignored.
+     */
+    public function reorder(Request $request, Publication $publication, Issue $issue)
+    {
+        $this->authorize('manageStories', $publication);
+
+        $validated = $request->validate([
+            'order' => 'required|array',
+            'order.*' => ['string', 'regex:/^(story|block):\d+$/'],
+        ]);
+
+        $storyIds = $issue->stories()->pluck('id')->all();
+        $blockIds = $issue->blocks()->pluck('id')->all();
+
+        DB::transaction(function () use ($validated, $issue, $storyIds, $blockIds) {
+            $position = 0;
+            foreach ($validated['order'] as $token) {
+                [$kind, $id] = explode(':', $token);
+                $id = (int) $id;
+
+                if ($kind === 'story' && in_array($id, $storyIds, true)) {
+                    $position++;
+                    $issue->stories()->whereKey($id)->update(['order' => $position]);
+                } elseif ($kind === 'block' && in_array($id, $blockIds, true)) {
+                    $position++;
+                    $issue->blocks()->whereKey($id)->update(['order' => $position]);
+                }
+            }
+        });
+
+        return response()->json(['status' => 'ok']);
     }
 
     /**
