@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BlockController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\ProfileController;
@@ -28,6 +29,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('publications', PublicationController::class);
     Route::get('publications/{publication}/editors', [PublicationController::class, 'editors'])->name('publications.editors');
 
+    // Publication layout & theme (section order + colour palette)
+    Route::get('publications/{publication}/structure', [PublicationController::class, 'editStructure'])->name('publications.structure.edit');
+    Route::put('publications/{publication}/structure', [PublicationController::class, 'updateStructure'])->name('publications.structure.update');
+
     // Team invitations + membership
     Route::post('publications/{publication}/invitations', [InvitationController::class, 'store'])->name('publications.invitations.store');
     Route::delete('publications/{publication}/invitations/{invitation}', [InvitationController::class, 'destroy'])
@@ -46,8 +51,22 @@ Route::middleware('auth')->group(function () {
         ->scopeBindings()
         ->name('publications.issues.send');
 
+    // Browser preview of an issue (rendered with the publication's layout + palette)
+    Route::get('publications/{publication}/issues/{issue}/preview', [IssueController::class, 'preview'])
+        ->scopeBindings()
+        ->name('publications.issues.preview');
+
+    // Drag-and-drop reorder of an issue's content stream (stories + blocks).
+    Route::patch('publications/{publication}/issues/{issue}/reorder', [IssueController::class, 'reorder'])
+        ->scopeBindings()
+        ->name('publications.issues.reorder');
+
     // Story routes (scoped to publication + issue)
     Route::resource('publications.issues.stories', StoryController::class)->scoped()->except(['index', 'show']);
+
+    // Content blocks (events, …) — scoped to publication + issue
+    Route::resource('publications.issues.blocks', BlockController::class)
+        ->scoped()->only(['create', 'store', 'edit', 'update', 'destroy']);
 
     // Public submission moderation queue (scoped to publication)
     Route::get('publications/{publication}/submissions', [SubmissionController::class, 'index'])->name('publications.submissions.index');

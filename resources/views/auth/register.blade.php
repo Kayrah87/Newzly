@@ -1,4 +1,9 @@
 <x-guest-layout>
+    <div class="mb-6">
+        <span class="np-kicker">Join the newsroom</span>
+        <h1 class="mt-1 font-display text-3xl font-black text-ink leading-tight">Create your account</h1>
+    </div>
+
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
@@ -40,7 +45,7 @@
         </div>
 
         <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
+            <a class="underline text-sm text-ink-soft hover:text-press-600 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-press-500" href="{{ route('login') }}">
                 {{ __('Already registered?') }}
             </a>
 

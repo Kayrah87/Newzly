@@ -1,13 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Create Issue') }} - {{ $publication->name }}
-        </h2>
+        <div>
+            <span class="np-kicker">{{ $publication->name }}</span>
+            <h2 class="font-display text-3xl font-black text-ink leading-tight">
+                {{ __('Create Issue') }}
+            </h2>
+        </div>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 px-4">
+            <div class="np-card">
                 <div class="p-6">
                     <form method="POST" action="{{ route('publications.issues.store', $publication) }}">
                         @csrf
@@ -45,7 +48,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <x-input-label for="status" :value="__('Status')" />
-                                <select id="status" name="status" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select id="status" name="status" class="np-input mt-1" required>
                                     <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>Draft</option>
                                     <option value="scheduled" {{ old('status') === 'scheduled' ? 'selected' : '' }}>Scheduled</option>
                                     <option value="sent" {{ old('status') === 'sent' ? 'selected' : '' }}>Sent</option>
@@ -61,7 +64,7 @@
                         </div>
 
                         <div class="flex items-center justify-end mt-6">
-                            <a href="{{ route('publications.issues.index', $publication) }}" class="text-gray-600 hover:text-gray-900 mr-4">Cancel</a>
+                            <a href="{{ route('publications.issues.index', $publication) }}" class="np-btn-outline mr-4">Cancel</a>
                             <x-primary-button>
                                 {{ __('Create Issue') }}
                             </x-primary-button>

@@ -1,14 +1,34 @@
-{{-- Picture story layout: hero image, then title + body. --}}
+{{--
+    Picture story layout (with photo): accent title banner, a full-bleed hero
+    image, then the body. Falls back to a plain title + body when no image is
+    attached, so the layout is safe "with or without a photo".
+    Table-based + inline styles + Outlook image fixes for cross-client safety.
+--}}
+@php($palette = $palette ?? $story->publication->paletteColors())
 @php($hero = $story->heroImage())
-<div style="margin-bottom:32px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">
+    <tr>
+        <td class="email-pad" bgcolor="{{ $palette['accent'] }}" style="padding:14px 24px; background:{{ $palette['accent'] }};">
+            <h2 style="margin:0; font-family:Arial,Helvetica,sans-serif; font-size:22px; line-height:28px; mso-line-height-rule:exactly; color:{{ $palette['accent_text'] }}; font-weight:bold;">{{ $story->title }}</h2>
+        </td>
+    </tr>
     @if($hero)
-        <img src="{{ $hero->url() }}" alt="{{ $hero->caption ?? $story->title }}" width="552" style="width:100%; max-width:552px; border-radius:6px; display:block; margin-bottom:12px;">
+        <tr>
+            <td bgcolor="{{ $palette['body_bg'] }}" style="padding:0; background:{{ $palette['body_bg'] }}; font-size:0; line-height:0;">
+                <img src="{{ $hero->url() }}" alt="{{ $hero->caption ?? $story->title }}" width="600" style="display:block; width:100%; max-width:600px; height:auto; border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic;">
+            </td>
+        </tr>
         @if($hero->caption)
-            <p style="margin:0 0 12px; font-size:12px; color:#9ca3af;">{{ $hero->caption }}</p>
+            <tr>
+                <td class="email-pad" bgcolor="{{ $palette['body_bg'] }}" style="padding:8px 24px 0; background:{{ $palette['body_bg'] }}; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:18px; mso-line-height-rule:exactly; color:{{ $palette['body_text'] }};">{{ $hero->caption }}</td>
+            </tr>
         @endif
     @endif
-    <h2 style="margin:0 0 8px; font-size:18px; color:#111827;">{{ $story->title }}</h2>
-    <div style="font-size:15px; line-height:1.6; color:#374151;">
-        {!! $story->content !!}
-    </div>
-</div>
+    <tr>
+        <td class="email-pad" bgcolor="{{ $palette['body_bg'] }}" style="padding:20px 24px; background:{{ $palette['body_bg'] }};">
+            <div class="story-content" style="font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:24px; mso-line-height-rule:exactly; color:{{ $palette['body_text'] }};">
+                {!! $story->content !!}
+            </div>
+        </td>
+    </tr>
+</table>

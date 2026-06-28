@@ -1,8 +1,9 @@
 <x-public-layout :publication="$publication" title="Unsubscribe">
-    <h2 class="text-lg font-semibold mb-2">Unsubscribe</h2>
-    <p class="text-gray-600 mb-4">
+    <span class="np-kicker">Manage subscription</span>
+    <h2 class="font-display text-2xl font-bold text-ink mt-1 mb-2">Unsubscribe</h2>
+    <p class="text-ink-soft mb-4">
         Are you sure you want to stop receiving {{ $publication->name }} at
-        <strong>{{ $subscriber->email }}</strong>?
+        <strong class="text-ink">{{ $subscriber->email }}</strong>?
     </p>
 
     <form method="POST" action="{{ route('public.unsubscribe.perform', ['publication' => $publication->slug, 'token' => $token]) }}">

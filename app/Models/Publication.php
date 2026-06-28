@@ -26,6 +26,43 @@ class Publication extends Model
         'mastodon' => 'Mastodon',
     ];
 
+    /**
+     * The reorderable sections that make up every issue, in canonical order.
+     * The header and footer are the same template for every publication; only
+     * their order (relative to the content) and the palette are configurable.
+     */
+    public const STRUCTURE_SECTIONS = ['header', 'content', 'footer'];
+
+    /**
+     * Human labels/descriptions for each structure section (for the editor UI).
+     *
+     * @var array<string, array{label: string, description: string}>
+     */
+    public const STRUCTURE_LABELS = [
+        'header' => ['label' => 'Masthead', 'description' => 'Logo, title, issue number and timeframe.'],
+        'content' => ['label' => 'Stories', 'description' => "The issue's articles, in their own order."],
+        'footer' => ['label' => 'Footer', 'description' => 'Sign-off, website link and the unsubscribe notice.'],
+    ];
+
+    /**
+     * Configurable palette colours => human label + default hex value.
+     *
+     * @var array<string, array{label: string, default: string}>
+     */
+    public const PALETTE_FIELDS = [
+        'header_bg' => ['label' => 'Header background', 'default' => '#16151a'],
+        'header_text' => ['label' => 'Header text', 'default' => '#ffffff'],
+        'subbar_bg' => ['label' => 'Issue bar background', 'default' => '#2a2a30'],
+        'subbar_text' => ['label' => 'Issue bar text', 'default' => '#ffffff'],
+        'accent' => ['label' => 'Accent', 'default' => '#cc0a1e'],
+        'accent_text' => ['label' => 'Accent text', 'default' => '#ffffff'],
+        'body_bg' => ['label' => 'Article background', 'default' => '#ffffff'],
+        'body_text' => ['label' => 'Article text', 'default' => '#374151'],
+        'footer_bg' => ['label' => 'Footer background', 'default' => '#16151a'],
+        'footer_text' => ['label' => 'Footer text', 'default' => '#cbd5e1'],
+        'page_bg' => ['label' => 'Page background', 'default' => '#f6f4ee'],
+    ];
+
     protected $fillable = [
         'name',
         'slug',
@@ -43,11 +80,15 @@ class Publication extends Model
         'smtp_encryption',
         'owner_id',
         'settings',
+        'structure',
+        'palette',
     ];
 
     protected $casts = [
         'settings' => 'array',
         'social_links' => 'array',
+        'structure' => 'array',
+        'palette' => 'array',
         'smtp_username' => 'encrypted',
         'smtp_password' => 'encrypted',
     ];
@@ -104,6 +145,51 @@ class Publication extends Model
         return $this->logo_path
             ? Storage::disk(static::mediaDisk())->url($this->logo_path)
             : null;
+    }
+
+    /**
+     * The header/content/footer order for this publication's issues.
+     * Always returns every section exactly once: the saved order first
+     * (ignoring anything unrecognised), with any missing sections appended
+     * in canonical order. Static across all of the publication's issues.
+     *
+     * @return list<string>
+     */
+    public function structureOrder(): array
+    {
+        $saved = is_array($this->structure)
+            ? array_values(array_intersect($this->structure, self::STRUCTURE_SECTIONS))
+            : [];
+
+        foreach (self::STRUCTURE_SECTIONS as $section) {
+            if (! in_array($section, $saved, true)) {
+                $saved[] = $section;
+            }
+        }
+
+        return $saved;
+    }
+
+    /**
+     * The resolved palette: every configurable colour, falling back to its
+     * default when unset or not a valid 6-digit hex value (which also keeps
+     * the values safe to inline into email/HTML styles).
+     *
+     * @return array<string, string>
+     */
+    public function paletteColors(): array
+    {
+        $saved = is_array($this->palette) ? $this->palette : [];
+        $colors = [];
+
+        foreach (self::PALETTE_FIELDS as $key => $config) {
+            $value = $saved[$key] ?? null;
+            $colors[$key] = (is_string($value) && preg_match('/^#[0-9a-fA-F]{6}$/', $value))
+                ? $value
+                : $config['default'];
+        }
+
+        return $colors;
     }
 
     /**

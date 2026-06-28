@@ -172,6 +172,63 @@ class PublicationController extends Controller
     }
 
     /**
+     * Show the layout & theme editor: the header/content/footer order
+     * (static across all issues) and the colour palette.
+     */
+    public function editStructure(Publication $publication)
+    {
+        $this->authorize('update', $publication);
+
+        return view('publications.structure', compact('publication'));
+    }
+
+    /**
+     * Persist the publication's section order and colour palette.
+     */
+    public function updateStructure(Request $request, Publication $publication)
+    {
+        $this->authorize('update', $publication);
+
+        $sections = implode(',', Publication::STRUCTURE_SECTIONS);
+
+        $validated = $request->validate([
+            'structure' => 'required|array',
+            'structure.*' => "string|in:{$sections}",
+            'palette' => 'nullable|array',
+            'palette.*' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+        ], [
+            'palette.*.regex' => 'Each colour must be a 6-digit hex value like #cc0a1e.',
+        ]);
+
+        // Normalise the order to exactly the known sections, in the submitted
+        // order, with any missing ones appended (so a section can never vanish).
+        $order = collect($validated['structure'])
+            ->intersect(Publication::STRUCTURE_SECTIONS)
+            ->unique()
+            ->values();
+
+        foreach (Publication::STRUCTURE_SECTIONS as $section) {
+            if (! $order->contains($section)) {
+                $order->push($section);
+            }
+        }
+
+        // Keep only recognised palette keys with a valid value.
+        $palette = collect($validated['palette'] ?? [])
+            ->only(array_keys(Publication::PALETTE_FIELDS))
+            ->filter(fn ($value) => filled($value))
+            ->all();
+
+        $publication->update([
+            'structure' => $order->all(),
+            'palette' => $palette ?: null,
+        ]);
+
+        return redirect()->route('publications.structure.edit', $publication)
+            ->with('success', 'Layout & theme updated.');
+    }
+
+    /**
      * Manage the publication's team (members + pending invitations).
      */
     public function editors(Publication $publication)
