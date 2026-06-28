@@ -36,11 +36,11 @@
         <tr>
             <td class="email-pad" style="padding:{{ $loop->first ? '18' : '10' }}px 24px 0;">
                 {{-- Event card: white sheet, hairline border, left accent bar. --}}
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="width:100%; border-collapse:separate; background:#ffffff; border:1px solid #e6e6e6; border-left:4px solid {{ $palette['accent'] }}; border-radius:8px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="width:100%; border-collapse:separate; background:#ffffff; border:1px solid #e6e6e6; border-left:4px solid {{ $palette['event_accent'] }}; border-radius:8px;">
                     <tr>
                         <td style="padding:16px 18px; font-family:Arial,Helvetica,sans-serif;">
                             @if($event->date)
-                                <p style="margin:0 0 6px 0; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:16px; mso-line-height-rule:exactly; letter-spacing:0.5px; text-transform:uppercase; color:{{ $palette['accent'] }}; font-weight:bold;">{{ $event->date->format('jS F Y') }}</p>
+                                <p style="margin:0 0 6px 0; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:16px; mso-line-height-rule:exactly; letter-spacing:0.5px; text-transform:uppercase; color:{{ $palette['event_accent'] }}; font-weight:bold;">{{ $event->date->format('jS F Y') }}</p>
                             @endif
                             <p style="margin:0; font-family:Arial,Helvetica,sans-serif; font-size:18px; line-height:24px; mso-line-height-rule:exactly; color:{{ $palette['body_text'] }}; font-weight:bold;">{{ $event->name }}</p>
                             @if(filled($event->location))

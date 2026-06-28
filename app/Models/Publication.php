@@ -56,6 +56,7 @@ class Publication extends Model
         'subbar_text' => ['label' => 'Issue bar text', 'default' => '#ffffff'],
         'accent' => ['label' => 'Accent', 'default' => '#cc0a1e'],
         'accent_text' => ['label' => 'Accent text', 'default' => '#ffffff'],
+        'event_accent' => ['label' => 'Event calendar', 'default' => '#cc0a1e'],
         'body_bg' => ['label' => 'Article background', 'default' => '#ffffff'],
         'body_text' => ['label' => 'Article text', 'default' => '#374151'],
         'footer_bg' => ['label' => 'Footer background', 'default' => '#16151a'],
@@ -187,6 +188,12 @@ class Publication extends Model
             $colors[$key] = (is_string($value) && preg_match('/^#[0-9a-fA-F]{6}$/', $value))
                 ? $value
                 : $config['default'];
+        }
+
+        // The event calendar colour follows the main accent unless it has been
+        // explicitly customised, so existing publications are unaffected.
+        if (! isset($saved['event_accent']) || ! preg_match('/^#[0-9a-fA-F]{6}$/', (string) ($saved['event_accent'] ?? ''))) {
+            $colors['event_accent'] = $colors['accent'];
         }
 
         return $colors;
