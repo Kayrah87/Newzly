@@ -38,48 +38,20 @@
         }
     </style>
 </head>
-<body style="margin:0; padding:0; background:#f3f4f6; font-family:Arial, Helvetica, sans-serif; color:#111827;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f3f4f6" style="background:#f3f4f6; mso-table-lspace:0pt; mso-table-rspace:0pt;">
+<body style="margin:0; padding:0; background:{{ $palette['page_bg'] }}; font-family:Arial, Helvetica, sans-serif; color:#111827;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="{{ $palette['page_bg'] }}" style="background:{{ $palette['page_bg'] }}; mso-table-lspace:0pt; mso-table-rspace:0pt;">
         <tr>
             <td align="center" style="padding:24px 12px;">
                 <!--[if mso]>
                 <table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td>
                 <![endif]-->
                 <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" class="email-container" style="width:600px; max-width:100%; background:#ffffff; border-radius:8px; overflow:hidden; mso-table-lspace:0pt; mso-table-rspace:0pt;">
-                    {{-- Header --}}
-                    <tr>
-                        <td class="email-pad" style="padding:24px; text-align:center; border-bottom:1px solid #e5e7eb;">
-                            @if($publication->logoUrl())
-                                <img src="{{ $publication->logoUrl() }}" alt="{{ $publication->name }}" height="48" style="display:inline-block; height:48px; border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic;">
-                            @endif
-                            <h1 style="margin:8px 0 0; font-family:Arial,Helvetica,sans-serif; font-size:20px; line-height:26px; mso-line-height-rule:exactly; color:#111827;">{{ $publication->name }}</h1>
-                            <p style="margin:4px 0 0; font-family:Arial,Helvetica,sans-serif; color:#6b7280; font-size:14px; line-height:20px;">{{ $issue->title }}</p>
-                        </td>
-                    </tr>
-
-                    {{-- Stories --}}
-                    <tr>
-                        <td class="email-pad" style="padding:24px;">
-                            @forelse($stories as $story)
-                                @include('emails.stories.'.($story->layout ?? 'standard'), ['story' => $story])
-                            @empty
-                                <p style="margin:0; font-family:Arial,Helvetica,sans-serif; color:#6b7280; font-size:15px; line-height:24px;">This issue has no stories yet.</p>
-                            @endforelse
-                        </td>
-                    </tr>
-
-                    {{-- Mandatory unsubscribe footer (GDPR) --}}
-                    <tr>
-                        <td class="email-pad" style="padding:24px; border-top:1px solid #e5e7eb; text-align:center; font-family:Arial,Helvetica,sans-serif; color:#9ca3af; font-size:12px; line-height:18px;">
-                            <p style="margin:0 0 8px 0;">You're receiving this because you subscribed to {{ $publication->name }}.</p>
-                            <p style="margin:0;">
-                                <a href="{{ $unsubscribeUrl }}" style="color:#6b7280; text-decoration:underline;">Unsubscribe</a>
-                                @if($publication->website_url)
-                                    &nbsp;·&nbsp;<a href="{{ $publication->website_url }}" style="color:#6b7280; text-decoration:underline;">Visit website</a>
-                                @endif
-                            </p>
-                        </td>
-                    </tr>
+                    {{-- Sections render in the publication's configured order
+                         (static across all of its issues). Header & footer are
+                         the same shared templates for every publication. --}}
+                    @foreach($structure as $section)
+                        @include('emails.parts.'.$section)
+                    @endforeach
                 </table>
                 <!--[if mso]>
                 </td></tr></table>

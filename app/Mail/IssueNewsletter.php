@@ -45,6 +45,8 @@ class IssueNewsletter extends Mailable
                 'issue' => $this->issue,
                 'publication' => $publication,
                 'stories' => $this->issue->stories()->approved()->with('images')->get(),
+                'structure' => $publication->structureOrder(),
+                'palette' => $publication->paletteColors(),
                 'unsubscribeUrl' => route('public.unsubscribe', [
                     'publication' => $publication->slug,
                     'token' => $this->subscriber->unsubscribe_token,

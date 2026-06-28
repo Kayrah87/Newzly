@@ -1,9 +1,12 @@
 <x-public-layout :publication="$publication" title="Unsubscribed">
-    <h2 class="text-lg font-semibold mb-2">You've been unsubscribed</h2>
-    <p class="text-gray-600">
-        You will no longer receive {{ $publication->name }}. We're sorry to see you go.
-    </p>
-    <a href="{{ route('public.subscribe', ['publication' => $publication->slug]) }}" class="inline-block mt-4 text-indigo-600 hover:text-indigo-800">
+    <span class="np-kicker">Subscription ended</span>
+    <h2 class="font-display text-2xl font-bold text-ink mt-1 mb-3">You've been unsubscribed</h2>
+    <div class="np-rule border-press-600 pt-3">
+        <p class="text-ink">
+            You will no longer receive {{ $publication->name }}. We're sorry to see you go.
+        </p>
+    </div>
+    <a href="{{ route('public.subscribe', ['publication' => $publication->slug]) }}" class="inline-block mt-4 text-press-600 hover:text-press-700 font-semibold">
         Changed your mind? Subscribe again
     </a>
 </x-public-layout>

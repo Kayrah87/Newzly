@@ -71,6 +71,32 @@ test('an image can be removed when editing a story', function () {
     Storage::disk(Publication::mediaDisk())->assertMissing($image->path);
 });
 
+test('the clear layout renders the title in the accent colour with no filled banner', function () {
+    $publication = Publication::factory()->create([
+        'logo_path' => null,
+        'palette' => ['accent' => '#6aa84f', 'body_bg' => '#efefef'],
+    ]);
+    $issue = Issue::factory()->create(['publication_id' => $publication->id]);
+    Story::factory()->create([
+        'publication_id' => $publication->id,
+        'issue_id' => $issue->id,
+        'title' => 'Clear Headline',
+        'content' => '<p>Body copy.</p>',
+        'layout' => 'standard_clear',
+        'status' => 'approved',
+    ]);
+
+    $html = renderIssueHtml($issue->fresh());
+
+    expect($html)
+        ->toContain('Clear Headline')
+        // Title text is the accent colour…
+        ->toContain('color:#6aa84f')
+        // …and it sits on the article background, not a filled accent banner.
+        ->toContain('background:#efefef')
+        ->not->toContain('bgcolor="#6aa84f"');
+});
+
 test('the email renders each layout and only approved stories', function () {
     $publication = Publication::factory()->create();
     $issue = Issue::factory()->create(['publication_id' => $publication->id]);

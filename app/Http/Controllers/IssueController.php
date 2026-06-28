@@ -115,6 +115,27 @@ class IssueController extends Controller
     }
 
     /**
+     * Render a browser preview of the issue exactly as it will be emailed:
+     * the publication's header/content/footer order and palette applied to the
+     * issue's stories (all stories, ordered, so drafts are previewable too).
+     */
+    public function preview(Publication $publication, Issue $issue)
+    {
+        $this->authorize('view', $publication);
+
+        $issue->load('stories.images');
+
+        return view('emails.issue', [
+            'issue' => $issue,
+            'publication' => $publication,
+            'stories' => $issue->stories,
+            'structure' => $publication->structureOrder(),
+            'palette' => $publication->paletteColors(),
+            'unsubscribeUrl' => '#',
+        ]);
+    }
+
+    /**
      * Send this issue to the publication's confirmed subscribers.
      */
     public function send(Publication $publication, Issue $issue)

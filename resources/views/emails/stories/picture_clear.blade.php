@@ -1,15 +1,15 @@
 {{--
-    Picture story layout (with photo): accent title banner, a full-bleed hero
-    image, then the body. Falls back to a plain title + body when no image is
-    attached, so the layout is safe "with or without a photo".
-    Table-based + inline styles + Outlook image fixes for cross-client safety.
+    Picture "clear" story layout (with photo): no filled accent banner — the
+    title is the accent colour over the article background, then a full-bleed
+    hero image, then the body. Falls back to title + body when no image is
+    attached. Table-based + inline styles + Outlook image fixes for safety.
 --}}
 @php($palette = $palette ?? $story->publication->paletteColors())
 @php($hero = $story->heroImage())
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">
     <tr>
-        <td class="email-pad" bgcolor="{{ $palette['accent'] }}" style="padding:14px 24px; background:{{ $palette['accent'] }};">
-            <h2 style="margin:0; font-family:Arial,Helvetica,sans-serif; font-size:22px; line-height:28px; mso-line-height-rule:exactly; color:{{ $palette['accent_text'] }}; font-weight:bold;">{{ $story->title }}</h2>
+        <td class="email-pad" bgcolor="{{ $palette['body_bg'] }}" style="padding:22px 24px {{ $hero ? '14px' : '22px' }}; background:{{ $palette['body_bg'] }};">
+            <h2 style="margin:0; font-family:Arial,Helvetica,sans-serif; font-size:22px; line-height:28px; mso-line-height-rule:exactly; color:{{ $palette['accent'] }}; font-weight:bold;">{{ $story->title }}</h2>
         </td>
     </tr>
     @if($hero)
@@ -25,7 +25,7 @@
         @endif
     @endif
     <tr>
-        <td class="email-pad" bgcolor="{{ $palette['body_bg'] }}" style="padding:20px 24px; background:{{ $palette['body_bg'] }};">
+        <td class="email-pad" bgcolor="{{ $palette['body_bg'] }}" style="padding:16px 24px 22px; background:{{ $palette['body_bg'] }};">
             <div class="story-content" style="font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:24px; mso-line-height-rule:exactly; color:{{ $palette['body_text'] }};">
                 {!! $story->content !!}
             </div>

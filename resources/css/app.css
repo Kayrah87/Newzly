@@ -7,7 +7,97 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/*
+ | Newzly newspaper design system.
+ | Black ink, newsprint paper, and a single editorial press-red accent.
+ | Display serif (Playfair) for mastheads/headlines; clean sans for UI/body.
+ */
 @theme {
     --font-sans: 'Figtree', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
         'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
+    /* Ink + paper */
+    --color-ink: #16151a;
+    --color-ink-soft: #3a3942;
+    --color-newsprint: #f6f4ee;
+
+    /* Editorial press red */
+    --color-press-50: #fff1f1;
+    --color-press-100: #ffdedf;
+    --color-press-200: #ffc2c5;
+    --color-press-300: #ff9499;
+    --color-press-400: #fb555f;
+    --color-press-500: #ef1d2c;
+    --color-press-600: #cc0a1e;
+    --color-press-700: #ab0a1a;
+    --color-press-800: #8b0e19;
+    --color-press-900: #74131b;
+}
+
+@layer base {
+    body {
+        @apply bg-newsprint text-ink;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    h1, h2, h3, h4, .font-display {
+        font-family: var(--font-display);
+    }
+}
+
+@layer components {
+    /* Small uppercase red label — the newspaper "kicker" above a headline. */
+    .np-kicker {
+        @apply inline-block font-sans text-xs font-bold uppercase tracking-[0.18em] text-press-600;
+    }
+
+    /* Section/masthead heavy top rule. */
+    .np-rule {
+        @apply border-t-2 border-ink;
+    }
+
+    /* Paper card: white sheet, sharp black hairline border, print-flat. */
+    .np-card {
+        @apply border border-ink/15 bg-white shadow-[2px_2px_0_0_rgba(22,21,26,0.06)];
+    }
+
+    /* Buttons — base spacing/typography shared by every variant. */
+    .np-btn, .np-btn-primary, .np-btn-ink, .np-btn-outline, .np-btn-ghost {
+        @apply inline-flex items-center justify-center gap-2 border px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-press-500 disabled:opacity-40;
+    }
+    .np-btn-primary {
+        @apply border-press-600 bg-press-600 text-white hover:bg-press-700 active:bg-press-800;
+    }
+    .np-btn-ink {
+        @apply border-ink bg-ink text-white hover:bg-ink-soft active:bg-black;
+    }
+    .np-btn-outline {
+        @apply border-ink bg-transparent text-ink hover:bg-ink hover:text-white;
+    }
+    .np-btn-ghost {
+        @apply border-ink/20 bg-white text-ink-soft hover:border-ink hover:text-ink;
+    }
+
+    /* Form inputs */
+    .np-input {
+        @apply block w-full border-ink/25 bg-white text-ink shadow-sm focus:border-press-500 focus:ring-press-500;
+    }
+    .np-label {
+        @apply block font-sans text-xs font-bold uppercase tracking-[0.1em] text-ink-soft;
+    }
+
+    /* Status badges */
+    .np-badge, .np-badge-ink, .np-badge-press {
+        @apply inline-flex items-center gap-1 border px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider;
+    }
+    .np-badge-ink {
+        @apply border-ink/20 bg-ink/5 text-ink;
+    }
+    .np-badge-press {
+        @apply border-press-600/30 bg-press-50 text-press-700;
+    }
 }

@@ -1,15 +1,19 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ $issue->title }}
-            </h2>
-            <div class="space-x-2">
+            <div>
+                <span class="np-kicker">{{ $publication->name }}</span>
+                <h2 class="font-display text-3xl font-black text-ink leading-tight">
+                    {{ $issue->title }}
+                </h2>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('publications.issues.preview', [$publication, $issue]) }}" target="_blank" rel="noopener" class="np-btn-ghost">Preview</a>
                 @can('update', $publication)
-                    <a href="{{ route('publications.issues.edit', [$publication, $issue]) }}" class="text-gray-600 hover:text-gray-900">Edit</a>
+                    <a href="{{ route('publications.issues.edit', [$publication, $issue]) }}" class="np-btn-outline">Edit</a>
                 @endcan
                 @can('manageStories', $publication)
-                    <a href="{{ route('publications.issues.stories.create', [$publication, $issue]) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">
+                    <a href="{{ route('publications.issues.stories.create', [$publication, $issue]) }}" class="np-btn-primary">
                         Add Story
                     </a>
                 @endcan
@@ -18,14 +22,14 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 px-4">
             @if(session('success'))
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                <div class="mb-4 border-l-4 border-press-600 bg-press-50 text-ink px-4 py-3 font-semibold">
                     {{ session('success') }}
                 </div>
             @endif
             @if(session('error'))
-                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                <div class="mb-4 border-l-4 border-ink bg-ink/5 text-ink px-4 py-3 font-semibold">
                     {{ session('error') }}
                 </div>
             @endif
@@ -34,63 +38,79 @@
                 <!-- Main Content -->
                 <div class="md:col-span-2">
                     <!-- Issue Content -->
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div class="np-card mb-6">
                         <div class="p-6">
-                            <h3 class="text-lg font-semibold mb-4">Issue Content</h3>
+                            <h3 class="font-display text-lg font-bold mb-4">Issue Content</h3>
                             @if($issue->content)
                                 <div class="prose max-w-none">
                                     {!! $issue->content !!}
                                 </div>
                             @else
-                                <p class="text-gray-500">No content added yet.</p>
+                                <p class="text-ink-soft">No content added yet.</p>
                             @endif
                         </div>
                     </div>
 
                     <!-- Stories -->
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="np-card"
+                        @can('manageStories', $publication)
+                            x-data="sortable({ url: '{{ route('publications.issues.stories.reorder', [$publication, $issue]) }}' })"
+                        @endcan>
                         <div class="p-6">
-                            <h3 class="text-lg font-semibold mb-4">Stories</h3>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-display text-lg font-bold">Stories</h3>
+                                @can('manageStories', $publication)
+                                    @if($issue->stories->count() > 1)
+                                        <div class="flex items-center gap-2 text-xs">
+                                            <span class="text-ink-soft uppercase tracking-wide">Drag to reorder</span>
+                                            <span x-show="saved" x-cloak x-transition class="np-badge-press">Order saved</span>
+                                            <span x-show="failed" x-cloak x-transition class="np-badge-ink">Save failed</span>
+                                        </div>
+                                    @endif
+                                @endcan
+                            </div>
                             @if($issue->stories->count() > 0)
-                                <div class="space-y-6">
+                                <div class="space-y-3" x-ref="list"
+                                     @dragstart="start($event)" @dragover="over($event)" @drop="drop($event)" @dragend="end($event)">
                                     @foreach($issue->stories as $story)
-                                        <div class="border-l-4 border-indigo-500 pl-4">
-                                            <div class="flex justify-between items-start mb-2">
-                                                <h4 class="font-semibold text-lg">{{ $story->title }}</h4>
-                                                @can('manageStories', $publication)
-                                                    <div class="flex space-x-2">
-                                                        <a href="{{ route('publications.issues.stories.edit', [$publication, $issue, $story]) }}" class="text-gray-600 hover:text-gray-800 text-sm">Edit</a>
-                                                        <form method="POST" action="{{ route('publications.issues.stories.destroy', [$publication, $issue, $story]) }}" class="inline" onsubmit="return confirm('Are you sure?');">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm">Delete</button>
-                                                        </form>
-                                                    </div>
-                                                @endcan
-                                            </div>
-                                            <p class="text-sm text-gray-600 mb-2">
-                                                By {{ $story->author->name ?? 'Unknown' }} • Order: {{ $story->order }}
-                                                • Layout: {{ str_replace('_', ' ', $story->layout) }}
-                                                @php
-                                                    $statusBadge = match($story->status) {
-                                                        'approved' => 'bg-green-100 text-green-800',
-                                                        'pending' => 'bg-yellow-100 text-yellow-800',
-                                                        default => 'bg-red-100 text-red-800',
-                                                    };
-                                                @endphp
-                                                <span class="px-2 py-0.5 text-xs rounded-full {{ $statusBadge }}">{{ ucfirst($story->status) }}</span>
-                                                @if($story->images->isNotEmpty())
-                                                    • {{ $story->images->count() }} image(s)
-                                                @endif
-                                            </p>
-                                            <div class="prose max-w-none">
-                                                {!! Str::limit($story->content, 300) !!}
+                                        <div class="border border-ink/15 bg-white p-4 flex gap-3 transition-shadow hover:shadow-sm"
+                                            @can('manageStories', $publication)
+                                                data-sort-item draggable="true" data-sort-id="{{ $story->id }}"
+                                            @endcan>
+                                            @can('manageStories', $publication)
+                                                <span class="text-ink-soft/60 select-none cursor-grab active:cursor-grabbing pt-1 leading-none text-lg" title="Drag to reorder" aria-hidden="true">⠿</span>
+                                            @endcan
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex justify-between items-start mb-2 gap-2">
+                                                    <h4 class="font-display font-bold text-lg text-ink">{{ $story->title }}</h4>
+                                                    @can('manageStories', $publication)
+                                                        <div class="flex items-center gap-3 text-sm font-semibold shrink-0">
+                                                            <a href="{{ route('publications.issues.stories.edit', [$publication, $issue, $story]) }}" class="text-ink-soft hover:text-ink">Edit</a>
+                                                            <form method="POST" action="{{ route('publications.issues.stories.destroy', [$publication, $issue, $story]) }}" class="inline" onsubmit="return confirm('Are you sure?');">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="text-press-600 hover:text-press-700">Delete</button>
+                                                            </form>
+                                                        </div>
+                                                    @endcan
+                                                </div>
+                                                <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink-soft mb-2">
+                                                    <span>By {{ $story->author->name ?? 'Unknown' }}</span>
+                                                    <span class="np-badge-ink">{{ str_replace('_', ' ', $story->layout) }}</span>
+                                                    <span class="np-badge-{{ $story->status === 'approved' ? 'press' : 'ink' }}">{{ ucfirst($story->status) }}</span>
+                                                    @if($story->images->isNotEmpty())
+                                                        <span>{{ $story->images->count() }} image(s)</span>
+                                                    @endif
+                                                </p>
+                                                <div class="prose max-w-none">
+                                                    {!! Str::limit($story->content, 300) !!}
+                                                </div>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
                             @else
-                                <p class="text-gray-500">No stories added yet. Add your first story to get started!</p>
+                                <p class="text-ink-soft">No stories added yet. Add your first story to get started!</p>
                             @endif
                         </div>
                     </div>
@@ -98,71 +118,67 @@
 
                 <!-- Sidebar -->
                 <div>
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div class="np-card mb-6">
                         <div class="p-6">
-                            <h3 class="text-lg font-semibold mb-4">Issue Details</h3>
+                            <h3 class="font-display text-lg font-bold mb-4">Issue Details</h3>
                             <div class="space-y-3">
                                 <div>
-                                    <span class="text-gray-600 font-medium">Status:</span>
-                                    <p class="capitalize px-2 py-1 rounded text-xs inline-block
-                                        @if($issue->status === 'draft') bg-gray-200 text-gray-700
-                                        @elseif($issue->status === 'scheduled') bg-blue-200 text-blue-700
-                                        @else bg-green-200 text-green-700
-                                        @endif">
+                                    <span class="text-ink-soft font-medium">Status:</span>
+                                    <p class="np-badge-{{ $issue->status === 'sent' ? 'press' : 'ink' }} mt-1">
                                         {{ $issue->status }}
                                     </p>
                                 </div>
                                 @if($issue->issue_number)
                                     <div>
-                                        <span class="text-gray-600 font-medium">Issue number:</span>
-                                        <p class="text-gray-800">#{{ $issue->issue_number }}</p>
+                                        <span class="text-ink-soft font-medium">Issue number:</span>
+                                        <p class="text-ink">#{{ $issue->issue_number }}</p>
                                     </div>
                                 @endif
                                 @if($issue->coverage_label)
                                     <div>
-                                        <span class="text-gray-600 font-medium">Coverage:</span>
-                                        <p class="text-gray-800">{{ $issue->coverage_label }}</p>
+                                        <span class="text-ink-soft font-medium">Coverage:</span>
+                                        <p class="text-ink">{{ $issue->coverage_label }}</p>
                                     </div>
                                 @endif
                                 @if($issue->release_date)
                                     <div>
-                                        <span class="text-gray-600 font-medium">Release date:</span>
-                                        <p class="text-gray-800">{{ $issue->release_date->format('M d, Y') }}</p>
+                                        <span class="text-ink-soft font-medium">Release date:</span>
+                                        <p class="text-ink">{{ $issue->release_date->format('M d, Y') }}</p>
                                     </div>
                                 @endif
                                 <div>
-                                    <span class="text-gray-600 font-medium">Created:</span>
-                                    <p class="text-gray-800">{{ $issue->created_at->format('M d, Y') }}</p>
+                                    <span class="text-ink-soft font-medium">Created:</span>
+                                    <p class="text-ink">{{ $issue->created_at->format('M d, Y') }}</p>
                                 </div>
                                 @if($issue->published_at)
                                     <div>
-                                        <span class="text-gray-600 font-medium">Published:</span>
-                                        <p class="text-gray-800">{{ $issue->published_at->format('M d, Y H:i') }}</p>
+                                        <span class="text-ink-soft font-medium">Published:</span>
+                                        <p class="text-ink">{{ $issue->published_at->format('M d, Y H:i') }}</p>
                                     </div>
                                 @endif
                                 <div>
-                                    <span class="text-gray-600 font-medium">Stories:</span>
-                                    <p class="text-gray-800">{{ $issue->stories->count() }}</p>
+                                    <span class="text-ink-soft font-medium">Stories:</span>
+                                    <p class="text-ink">{{ $issue->stories->count() }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     @can('update', $publication)
-                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                        <div class="np-card mb-6">
                             <div class="p-6">
-                                <h3 class="text-lg font-semibold mb-4">Send</h3>
+                                <h3 class="font-display text-lg font-bold mb-4">Send</h3>
                                 @if($issue->isSent())
-                                    <p class="text-sm text-gray-600 mb-1">
+                                    <p class="text-sm text-ink-soft mb-1">
                                         Sent {{ $issue->published_at?->format('M d, Y H:i') }}
                                     </p>
-                                    <p class="text-sm text-gray-600">
+                                    <p class="text-sm text-ink-soft">
                                         {{ $issue->deliveries()->where('status', 'sent')->count() }} delivered
                                         @php $failed = $issue->deliveries()->where('status', 'failed')->count(); @endphp
-                                        @if($failed > 0)<span class="text-red-600">, {{ $failed }} failed</span>@endif
+                                        @if($failed > 0)<span class="text-press-600 font-semibold">, {{ $failed }} failed</span>@endif
                                     </p>
                                 @else
-                                    <p class="text-sm text-gray-600 mb-3">
+                                    <p class="text-sm text-ink-soft mb-3">
                                         {{ $publication->subscribers()->where('status', 'confirmed')->count() }} confirmed subscriber(s) will receive this issue.
                                     </p>
                                     <form method="POST" action="{{ route('publications.issues.send', [$publication, $issue]) }}" onsubmit="return confirm('Send this issue to all confirmed subscribers?');">
@@ -174,14 +190,14 @@
                         </div>
                     @endcan
 
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div class="np-card mb-6">
                         <div class="p-6">
-                            <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
-                            <div class="space-y-2">
-                                <a href="{{ route('publications.issues.index', $publication) }}" class="block text-indigo-600 hover:text-indigo-800">
+                            <h3 class="font-display text-lg font-bold mb-4">Quick Actions</h3>
+                            <div class="space-y-2 text-sm font-semibold">
+                                <a href="{{ route('publications.issues.index', $publication) }}" class="block text-press-600 hover:text-press-700">
                                     Back to Issues
                                 </a>
-                                <a href="{{ route('publications.show', $publication) }}" class="block text-indigo-600 hover:text-indigo-800">
+                                <a href="{{ route('publications.show', $publication) }}" class="block text-press-600 hover:text-press-700">
                                     View Publication
                                 </a>
                             </div>
@@ -189,9 +205,9 @@
                     </div>
 
                     @can('update', $publication)
-                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <div class="np-card">
                             <div class="p-6">
-                                <h3 class="text-lg font-semibold mb-4 text-red-600">Danger Zone</h3>
+                                <h3 class="font-display text-lg font-bold mb-4 text-press-600">Danger Zone</h3>
                                 <form method="POST" action="{{ route('publications.issues.destroy', [$publication, $issue]) }}" onsubmit="return confirm('Are you sure you want to delete this issue? This action cannot be undone.');">
                                     @csrf
                                     @method('DELETE')

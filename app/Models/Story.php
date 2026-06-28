@@ -12,7 +12,22 @@ class Story extends Model
 {
     use HasFactory;
 
-    public const LAYOUTS = ['standard', 'picture', 'title_only'];
+    public const LAYOUTS = ['standard', 'standard_clear', 'picture', 'picture_clear', 'title_only'];
+
+    /**
+     * Human labels for each layout, for the story form select.
+     * The "clear" variants drop the filled accent banner: the header sits on the
+     * article background and the title itself is rendered in the accent colour.
+     *
+     * @var array<string, string>
+     */
+    public const LAYOUT_LABELS = [
+        'standard' => 'Standard — accent banner',
+        'standard_clear' => 'Standard — clear header, accent title',
+        'picture' => 'Picture — accent banner + photo',
+        'picture_clear' => 'Picture — clear header, accent title + photo',
+        'title_only' => 'Title only',
+    ];
 
     public const SOURCE_ADMIN = 'admin';
 

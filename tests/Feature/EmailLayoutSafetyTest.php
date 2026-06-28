@@ -45,9 +45,10 @@ test('an article with a photo uses an email-safe hero image', function () {
     $html = renderIssueHtml($issue->fresh());
 
     // Hero image present with the attributes email clients (incl. Outlook) need.
+    // The picture layout uses a full-bleed (600px) hero above the body block.
     expect($html)
         ->toContain('<img')
-        ->toContain('width="552"')
+        ->toContain('width="600"')
         ->toContain('display:block')
         ->toContain('height:auto')
         ->toContain('alt="A caption"')

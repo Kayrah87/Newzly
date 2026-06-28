@@ -28,6 +28,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('publications', PublicationController::class);
     Route::get('publications/{publication}/editors', [PublicationController::class, 'editors'])->name('publications.editors');
 
+    // Publication layout & theme (section order + colour palette)
+    Route::get('publications/{publication}/structure', [PublicationController::class, 'editStructure'])->name('publications.structure.edit');
+    Route::put('publications/{publication}/structure', [PublicationController::class, 'updateStructure'])->name('publications.structure.update');
+
     // Team invitations + membership
     Route::post('publications/{publication}/invitations', [InvitationController::class, 'store'])->name('publications.invitations.store');
     Route::delete('publications/{publication}/invitations/{invitation}', [InvitationController::class, 'destroy'])
@@ -45,6 +49,17 @@ Route::middleware('auth')->group(function () {
     Route::post('publications/{publication}/issues/{issue}/send', [IssueController::class, 'send'])
         ->scopeBindings()
         ->name('publications.issues.send');
+
+    // Browser preview of an issue (rendered with the publication's layout + palette)
+    Route::get('publications/{publication}/issues/{issue}/preview', [IssueController::class, 'preview'])
+        ->scopeBindings()
+        ->name('publications.issues.preview');
+
+    // Drag-and-drop reorder of an issue's stories (defined before the resource
+    // so "stories/reorder" isn't captured by the "stories/{story}" routes).
+    Route::patch('publications/{publication}/issues/{issue}/stories/reorder', [StoryController::class, 'reorder'])
+        ->scopeBindings()
+        ->name('publications.issues.stories.reorder');
 
     // Story routes (scoped to publication + issue)
     Route::resource('publications.issues.stories', StoryController::class)->scoped()->except(['index', 'show']);
