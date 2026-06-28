@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Process;
 
 class InstallLivewire extends Command
 {
@@ -31,10 +31,11 @@ class InstallLivewire extends Command
 
         // Install Livewire
         $result = Process::run('composer require livewire/livewire');
-        
+
         if ($result->failed()) {
             $this->error('❌ Failed to install Livewire');
             $this->error($result->errorOutput());
+
             return 1;
         }
 
@@ -64,17 +65,18 @@ class InstallLivewire extends Command
     private function installVolt(): void
     {
         $this->info('📦 Installing Livewire VOLT...');
-        
+
         $result = Process::run('composer require livewire/volt');
-        
+
         if ($result->failed()) {
             $this->error('❌ Failed to install VOLT');
             $this->error($result->errorOutput());
+
             return;
         }
 
         $this->info('✅ VOLT installed successfully');
-        
+
         // Install VOLT
         Process::run('php artisan volt:install');
         $this->info('  • VOLT installed and configured');

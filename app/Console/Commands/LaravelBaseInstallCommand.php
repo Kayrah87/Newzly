@@ -2,13 +2,13 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
 use Exception;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Process;
 
 class LaravelBaseInstallCommand extends Command
 {
@@ -48,8 +48,9 @@ class LaravelBaseInstallCommand extends Command
         $this->displayConfigurationSummary();
 
         // Confirm before proceeding
-        if (!$this->confirm('Proceed with installation?', true)) {
+        if (! $this->confirm('Proceed with installation?', true)) {
             $this->info('Installation cancelled.');
+
             return Command::SUCCESS;
         }
 
@@ -61,12 +62,12 @@ class LaravelBaseInstallCommand extends Command
             $this->generateApplicationKey();
 
             // Step 3: Install Composer dependencies
-            if (!$this->option('skip-composer')) {
+            if (! $this->option('skip-composer')) {
                 $this->installComposerDependencies();
             }
 
             // Step 4: Install NPM dependencies
-            if (!$this->option('skip-npm')) {
+            if (! $this->option('skip-npm')) {
                 $this->installNpmDependencies();
             }
 
@@ -77,7 +78,7 @@ class LaravelBaseInstallCommand extends Command
             $this->runMigrations();
 
             // Step 7: Create base user
-            if (!$this->option('skip-user')) {
+            if (! $this->option('skip-user')) {
                 $this->createBaseUser();
             }
 
@@ -85,7 +86,7 @@ class LaravelBaseInstallCommand extends Command
             $this->setApplicationName();
 
             // Step 9: Build frontend assets
-            if (!$this->option('skip-npm')) {
+            if (! $this->option('skip-npm')) {
                 $this->buildAssets();
             }
 
@@ -94,7 +95,8 @@ class LaravelBaseInstallCommand extends Command
             $this->displaySummary();
 
         } catch (Exception $e) {
-            $this->error('❌ Installation failed: ' . $e->getMessage());
+            $this->error('❌ Installation failed: '.$e->getMessage());
+
             return Command::FAILURE;
         }
 
@@ -111,24 +113,24 @@ class LaravelBaseInstallCommand extends Command
         $this->newLine();
 
         // Application name
-        if (!$this->option('name')) {
+        if (! $this->option('name')) {
             $appName = $this->ask('Application name', 'Laravel-Base');
             $this->input->setOption('name', $appName);
         }
 
         // User details
-        if (!$this->option('skip-user')) {
-            if (!$this->option('user-name')) {
+        if (! $this->option('skip-user')) {
+            if (! $this->option('user-name')) {
                 $userName = $this->ask('Admin user name', 'Admin');
                 $this->input->setOption('user-name', $userName);
             }
 
-            if (!$this->option('user-email')) {
+            if (! $this->option('user-email')) {
                 $userEmail = $this->ask('Admin user email', 'admin@example.com');
                 $this->input->setOption('user-email', $userEmail);
             }
 
-            if (!$this->option('user-password')) {
+            if (! $this->option('user-password')) {
                 $userPassword = $this->secret('Admin user password (min 8 characters)');
                 if (empty($userPassword)) {
                     $userPassword = 'password';
@@ -145,7 +147,7 @@ class LaravelBaseInstallCommand extends Command
         }
 
         // Installation options
-        if (!$this->option('skip-composer') && !$this->option('skip-npm')) {
+        if (! $this->option('skip-composer') && ! $this->option('skip-npm')) {
             $this->newLine();
             $this->info('📦 Installation Options');
 
@@ -172,18 +174,18 @@ class LaravelBaseInstallCommand extends Command
     {
         $this->info('📋 Installation Configuration:');
         $this->info('────────────────────────────────────────');
-        $this->info('• Application Name: ' . ($this->option('name') ?: 'Laravel-Base'));
+        $this->info('• Application Name: '.($this->option('name') ?: 'Laravel-Base'));
 
-        if (!$this->option('skip-user')) {
-            $this->info('• Admin User: ' . ($this->option('user-name') ?: 'Admin'));
-            $this->info('• Admin Email: ' . ($this->option('user-email') ?: 'admin@example.com'));
-            $this->info('• Admin Password: ' . str_repeat('*', strlen($this->option('user-password') ?: 'password')));
+        if (! $this->option('skip-user')) {
+            $this->info('• Admin User: '.($this->option('user-name') ?: 'Admin'));
+            $this->info('• Admin Email: '.($this->option('user-email') ?: 'admin@example.com'));
+            $this->info('• Admin Password: '.str_repeat('*', strlen($this->option('user-password') ?: 'password')));
         } else {
             $this->info('• Admin User: Skipped');
         }
 
-        $this->info('• Composer Install: ' . ($this->option('skip-composer') ? 'Skipped' : 'Yes'));
-        $this->info('• NPM Install: ' . ($this->option('skip-npm') ? 'Skipped' : 'Yes'));
+        $this->info('• Composer Install: '.($this->option('skip-composer') ? 'Skipped' : 'Yes'));
+        $this->info('• NPM Install: '.($this->option('skip-npm') ? 'Skipped' : 'Yes'));
         $this->newLine();
     }
 
@@ -197,13 +199,14 @@ class LaravelBaseInstallCommand extends Command
         $envExamplePath = base_path('.env.example');
         $envPath = base_path('.env');
 
-        if (!File::exists($envExamplePath)) {
+        if (! File::exists($envExamplePath)) {
             throw new Exception('.env.example file not found');
         }
 
         if (File::exists($envPath)) {
-            if (!$this->confirm('⚠️  .env file already exists. Overwrite it?', false)) {
+            if (! $this->confirm('⚠️  .env file already exists. Overwrite it?', false)) {
                 $this->info('  • Skipping .env file creation');
+
                 return;
             }
         }
@@ -222,7 +225,7 @@ class LaravelBaseInstallCommand extends Command
         $result = Process::run('php artisan key:generate --ansi');
 
         if ($result->failed()) {
-            throw new Exception('Failed to generate application key: ' . $result->errorOutput());
+            throw new Exception('Failed to generate application key: '.$result->errorOutput());
         }
 
         $this->info('  • Application key generated');
@@ -242,7 +245,7 @@ class LaravelBaseInstallCommand extends Command
             $result = Process::run('composer install');
 
             if ($result->failed()) {
-                throw new Exception('Failed to install Composer dependencies: ' . $result->errorOutput());
+                throw new Exception('Failed to install Composer dependencies: '.$result->errorOutput());
             }
         }
 
@@ -257,15 +260,16 @@ class LaravelBaseInstallCommand extends Command
         $this->info('📦 Installing NPM dependencies...');
 
         // Check if package.json exists
-        if (!File::exists(base_path('package.json'))) {
+        if (! File::exists(base_path('package.json'))) {
             $this->warn('  • No package.json found, skipping NPM installation');
+
             return;
         }
 
         $result = Process::run('npm install');
 
         if ($result->failed()) {
-            throw new Exception('Failed to install NPM dependencies: ' . $result->errorOutput());
+            throw new Exception('Failed to install NPM dependencies: '.$result->errorOutput());
         }
 
         $this->info('  • NPM dependencies installed');
@@ -281,10 +285,10 @@ class LaravelBaseInstallCommand extends Command
         try {
             $databasePath = database_path('database.sqlite');
 
-            if (!file_exists($databasePath)) {
+            if (! file_exists($databasePath)) {
                 // Create database directory if it doesn't exist
                 $databaseDir = dirname($databasePath);
-                if (!is_dir($databaseDir)) {
+                if (! is_dir($databaseDir)) {
                     mkdir($databaseDir, 0755, true);
                 }
 
@@ -292,12 +296,12 @@ class LaravelBaseInstallCommand extends Command
                 touch($databasePath);
                 chmod($databasePath, 0664);
 
-                $this->info('  • SQLite database created at: ' . $databasePath);
+                $this->info('  • SQLite database created at: '.$databasePath);
             } else {
                 $this->info('  • SQLite database already exists');
             }
         } catch (Exception $e) {
-            throw new Exception('Failed to create database: ' . $e->getMessage());
+            throw new Exception('Failed to create database: '.$e->getMessage());
         }
     }
 
@@ -312,7 +316,7 @@ class LaravelBaseInstallCommand extends Command
             Artisan::call('migrate', ['--force' => true]);
             $this->info('  • Database migrations completed');
         } catch (Exception $e) {
-            throw new Exception('Failed to run migrations: ' . $e->getMessage());
+            throw new Exception('Failed to run migrations: '.$e->getMessage());
         }
     }
 
@@ -329,8 +333,9 @@ class LaravelBaseInstallCommand extends Command
 
         // Check if user already exists
         if (User::where('email', $email)->exists()) {
-            if (!$this->confirm("⚠️  User with email '{$email}' already exists. Update password?", false)) {
+            if (! $this->confirm("⚠️  User with email '{$email}' already exists. Update password?", false)) {
                 $this->info('  • Skipping user creation');
+
                 return;
             }
 
@@ -365,7 +370,7 @@ class LaravelBaseInstallCommand extends Command
         $appName = $this->option('name') ?: 'Laravel-Base';
         $envPath = base_path('.env');
 
-        if (!File::exists($envPath)) {
+        if (! File::exists($envPath)) {
             throw new Exception('.env file not found');
         }
 
@@ -383,8 +388,9 @@ class LaravelBaseInstallCommand extends Command
     {
         $this->info('🎨 Building frontend assets...');
 
-        if (!File::exists(base_path('package.json'))) {
+        if (! File::exists(base_path('package.json'))) {
             $this->info('  • No package.json found, skipping asset build');
+
             return;
         }
 
@@ -409,33 +415,33 @@ class LaravelBaseInstallCommand extends Command
         $this->info('✅ Environment file: .env created');
         $this->info('✅ Application key: Generated');
 
-        if (!$this->option('skip-composer')) {
+        if (! $this->option('skip-composer')) {
             $this->info('✅ Composer: Dependencies installed');
         }
 
-        if (!$this->option('skip-npm')) {
+        if (! $this->option('skip-npm')) {
             $this->info('✅ NPM: Dependencies installed');
             $this->info('✅ Assets: Built for production');
         }
 
         $this->info('✅ Database: Migrations completed');
 
-        if (!$this->option('skip-user')) {
+        if (! $this->option('skip-user')) {
             $this->info('✅ Base User: Created');
         }
 
-        $this->info('✅ App Name: ' . ($this->option('name') ?: 'Laravel-Base'));
+        $this->info('✅ App Name: '.($this->option('name') ?: 'Laravel-Base'));
 
         $this->newLine();
         $this->info('🚀 Next Steps:');
         $this->info('  • Start the development server: php artisan serve');
 
-        if (!$this->option('skip-npm')) {
+        if (! $this->option('skip-npm')) {
             $this->info('  • Start Vite dev server: npm run dev');
         }
 
-        if (!$this->option('skip-user')) {
-            $this->info('  • Login with: ' . ($this->option('user-email') ?: 'admin@example.com') . ' / ' . ($this->option('user-password') ?: 'password'));
+        if (! $this->option('skip-user')) {
+            $this->info('  • Login with: '.($this->option('user-email') ?: 'admin@example.com').' / '.($this->option('user-password') ?: 'password'));
         }
 
         $this->info('  • Visit: http://localhost:8000');
