@@ -21,7 +21,7 @@
 
                         <div class="mb-4">
                             <x-input-label for="content" :value="__('Content')" />
-                            <textarea id="content" name="content" rows="15" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>{{ old('content', $story->content) }}</textarea>
+                            <x-wysiwyg-editor name="content" :value="old('content', $story->content)" />
                             <x-input-error :messages="$errors->get('content')" class="mt-2" />
                         </div>
 
@@ -89,21 +89,4 @@
         </div>
     </div>
 
-    @push('scripts')
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-    <script>
-        tinymce.init({
-            selector: '#content',
-            height: 500,
-            menubar: false,
-            plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                'insertdatetime', 'media', 'table', 'help', 'wordcount'
-            ],
-            toolbar: 'undo redo | blocks | bold italic forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
-            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-        });
-    </script>
-    @endpush
 </x-app-layout>
